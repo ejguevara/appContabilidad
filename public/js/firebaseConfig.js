@@ -1,20 +1,23 @@
 // firebaseConfig.js
 // -----------------------------------------------------------------------
 // Configuracion e inicializacion de Firebase (SDK modular v10, via CDN).
-// Reemplaza los valores de "firebaseConfig" con los de TU proyecto de
-// Firebase: Firebase Console > Configuracion del proyecto > Tus apps >
-// SDK setup and configuration > Config.
 //
 // IMPORTANTE: estas claves (apiKey, etc.) son publicas por diseno en apps
 // web de Firebase; la seguridad real la dan las Reglas de Seguridad de
-// Firestore (ver README.md), no ocultar este archivo.
+// Firestore y de Auth (ver README.md), no ocultar este archivo.
+//
+// NOTA: los imports deben venir de la URL de gstatic.com (CDN), no de
+// especificadores tipo "firebase/app" — esos solo funcionan con un
+// bundler (Vite, webpack, etc.), y esta app corre como HTML/JS plano
+// directo en el navegador, sin bundler.
 // -----------------------------------------------------------------------
 
-import { initializeApp } from 'firebase/app';
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js';
 import {
   getFirestore,
   connectFirestoreEmulator,
 } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js';
+import { getAuth } from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-auth.js';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyBQepyJDGRl-jk-4jtGrnfbPUej2zHHcgU',
@@ -27,8 +30,8 @@ const firebaseConfig = {
 
 export const firebaseApp = initializeApp(firebaseConfig);
 export const db = getFirestore(firebaseApp);
+export const auth = getAuth(firebaseApp);
 
-// Descomenta estas dos lineas si quieres desarrollar contra el
-// emulador local de Firestore (firebase emulators:start) en vez del
-// proyecto real:
+// Descomenta esta linea si quieres desarrollar contra el emulador local
+// de Firestore (firebase emulators:start) en vez del proyecto real:
 // connectFirestoreEmulator(db, 'localhost', 8080);

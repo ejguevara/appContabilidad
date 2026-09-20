@@ -1,7 +1,8 @@
 // app.js
-// Punto de entrada de la aplicacion: navegacion entre modulos (tabs) e
-// inicializacion de cada uno.
+// Punto de entrada de la aplicacion: autenticacion, navegacion entre
+// modulos (tabs) e inicializacion de cada uno.
 
+import { initAuth } from './auth.js';
 import { initCuentas } from './cuentas.js';
 import { initDiario } from './diario.js';
 import { initKardex } from './kardex.js';
@@ -32,7 +33,12 @@ function activarTab(tab) {
   });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+let appYaInicializada = false;
+
+function initApp() {
+  if (appYaInicializada) return; // por si onAuthStateChanged dispara mas de una vez
+  appYaInicializada = true;
+
   initNavegacion();
   // El orden importa: cuentas primero, porque los demas modulos dependen
   // de getCuentasCache() y de los <select data-cuentas-select>.
@@ -42,4 +48,10 @@ document.addEventListener('DOMContentLoaded', () => {
   initCierre();
   initReportes();
   initDashboard();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  // La app solo arranca cuando hay una sesion de Firebase Auth activa.
+  // Mientras tanto, auth.js muestra la pantalla de login/registro.
+  initAuth(initApp);
 });

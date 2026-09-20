@@ -12,6 +12,39 @@
 
   <div id="toast-container" class="fixed top-4 right-4 z-50 w-72"></div>
 
+  <!-- ============ PANTALLA DE LOGIN / REGISTRO ============ -->
+  <div id="pantalla-login" class="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+    <div class="w-full max-w-sm bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+      <div class="text-center mb-6">
+        <h1 class="font-bold text-xl text-slate-800">App Contable</h1>
+        <p class="text-xs text-slate-400">El Salvador · IVA 13%</p>
+      </div>
+      <h2 id="auth-titulo" class="text-lg font-semibold text-slate-700 mb-4">Iniciar sesion</h2>
+      <form id="form-auth" class="space-y-3">
+        <div>
+          <label class="text-xs font-medium text-slate-500">Correo</label>
+          <input id="auth-email" type="email" required autocomplete="username" placeholder="tucorreo@ejemplo.com"
+            class="w-full mt-1 rounded-md border-slate-300 focus:ring-indigo-500 focus:border-indigo-500" />
+        </div>
+        <div>
+          <label class="text-xs font-medium text-slate-500">Contraseña</label>
+          <input id="auth-password" type="password" required autocomplete="current-password" placeholder="Minimo 6 caracteres"
+            class="w-full mt-1 rounded-md border-slate-300 focus:ring-indigo-500 focus:border-indigo-500" />
+        </div>
+        <button id="auth-submit" type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-2 rounded-lg">
+          Entrar
+        </button>
+      </form>
+      <button id="auth-toggle-modo" type="button" class="w-full text-center text-xs text-indigo-600 hover:underline mt-4">
+        ¿No tienes cuenta? Crea una
+      </button>
+      <p class="text-xs text-slate-400 text-center mt-4">Cualquier usuario con una cuenta puede usar toda la app.</p>
+    </div>
+  </div>
+
+  <!-- ============ APP (solo visible con sesion activa) ============ -->
+  <div id="app-shell" class="hidden">
+
   <!-- Modal calculadora de IVA -->
   <div id="iva-modal" class="hidden fixed inset-0 bg-black/40 z-40 flex items-center justify-center px-4">
     <div class="bg-white rounded-xl shadow-xl w-full max-w-sm p-5">
@@ -48,7 +81,10 @@
         <button data-tab-btn="cierre" class="w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition">🧾 Cierre e Impuestos</button>
         <button data-tab-btn="reportes" class="w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition">📑 Reportes</button>
       </nav>
-      <div class="p-4 text-xs text-slate-400 border-t border-slate-100">Conectado a Firebase Firestore en tiempo real.</div>
+      <div class="p-4 border-t border-slate-100">
+        <p class="text-xs text-slate-400 truncate" id="auth-user-email"></p>
+        <button id="btn-logout" type="button" class="text-xs text-rose-500 hover:underline mt-1">Cerrar sesion</button>
+      </div>
     </aside>
 
     <!-- Contenido -->
@@ -360,6 +396,8 @@
 
     </main>
   </div>
+
+  </div><!-- /#app-shell -->
 
   <script type="module" src="js/app.js"></script>
 </body>
