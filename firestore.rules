@@ -1,0 +1,24 @@
+rules_version = '2';
+
+// Reglas de ejemplo para desarrollo/uso academico.
+// ADVERTENCIA: estas reglas permiten lectura/escritura a cualquiera que
+// tenga la URL de tu proyecto. Son utiles para probar rapido, pero antes
+// de compartir el proyecto o subirlo a produccion deberias:
+//   1. Activar Firebase Authentication (por ejemplo, Email/Password).
+//   2. Cambiar "if true" por "if request.auth != null" para exigir login.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /cuentas/{cuentaId} {
+      allow read, write: if true;
+    }
+    match /partidas/{partidaId} {
+      allow read, write: if true;
+    }
+    match /movimientos/{movId} {
+      allow read, write: if true;
+    }
+    match /kardex/{kardexId} {
+      allow read, write: if true;
+    }
+  }
+}

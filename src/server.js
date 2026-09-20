@@ -1,5 +1,6 @@
 require('dotenv').config();
 
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -11,8 +12,11 @@ const routes = require('./routes');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middlewares base
-app.use(helmet());
+// Middlewares base.
+// contentSecurityPolicy se desactiva porque el frontend carga Tailwind,
+// Chart.js y el SDK de Firebase desde CDNs externos (cdn.tailwindcss.com,
+// cdn.jsdelivr.net, gstatic.com); la CSP por defecto de helmet los bloquearia.
+app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
@@ -34,7 +38,12 @@ app.get('/health', (req, res) => {
 // Rutas de la API
 app.use('/api', routes);
 
-// Manejo de rutas no encontradas
+// Frontend estatico (Tailwind + JS + Firestore): sirve la carpeta "public"
+// (index.html, css/, js/) en la raiz del sitio, ej. http://localhost:3000/
+app.use(express.static(path.join(__dirname, '..', 'public')));
+
+// Manejo de rutas no encontradas (solo para las que no son ni /api ni un
+// archivo estatico existente en /public)
 app.use((req, res) => {
   res.status(404).json({ error: 'Ruta no encontrada' });
 });
@@ -50,6 +59,7 @@ app.use((err, req, res, next) => {
 
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
+  console.log(`Frontend disponible en http://localhost:${PORT}/`);
 });
 
 module.exports = app;
