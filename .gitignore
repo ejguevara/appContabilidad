@@ -1,0 +1,11 @@
+node_modules/
+.env
+*.log
+npm-debug.log*
+.DS_Store
+dist/
+coverage/
+
+# Credenciales de Firebase (por si se descarga el JSON del service account)
+*firebase-adminsdk*.json
+serviceAccountKey.json
