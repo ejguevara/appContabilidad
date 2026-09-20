@@ -44,17 +44,15 @@ function formatMoney(n) {
 // -----------------------------------------------------------------------
 
 const CUENTAS_BASE = [
-  { codigo: '1101', nombre: 'Caja General', tipo: 'activo' },
+  { codigo: '1101', nombre: 'Caja', tipo: 'activo' },
   { codigo: '1102', nombre: 'Bancos', tipo: 'activo' },
   { codigo: '1103', nombre: 'Clientes', tipo: 'activo' },
   { codigo: '1104', nombre: 'IVA Credito Fiscal', tipo: 'activo' },
-  { codigo: '1105', nombre: 'Inventario de Mercaderias', tipo: 'activo' },
+  { codigo: '1105', nombre: 'Inventario', tipo: 'activo' },
   { codigo: '2101', nombre: 'Proveedores', tipo: 'pasivo' },
   { codigo: '2102', nombre: 'IVA Debito Fiscal', tipo: 'pasivo' },
   { codigo: '2103', nombre: 'IVA por Pagar', tipo: 'pasivo' },
-  { codigo: '2104', nombre: 'Retenciones por Pagar', tipo: 'pasivo' },
   { codigo: '3101', nombre: 'Capital Social', tipo: 'patrimonio' },
-  { codigo: '3102', nombre: 'Utilidades Retenidas', tipo: 'patrimonio' },
   { codigo: '4101', nombre: 'Ventas', tipo: 'ingreso' },
   { codigo: '5101', nombre: 'Compras', tipo: 'egreso' },
   { codigo: '5102', nombre: 'Costo de Ventas', tipo: 'egreso' },

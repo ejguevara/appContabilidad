@@ -66,17 +66,15 @@ export async function eliminarCuenta(id) {
 /** Carga un catalogo de cuentas base tipico de una empresa comercial salvadorena. */
 export async function cargarPlanDeCuentasBase() {
   const base = [
-    { codigo: '1101', nombre: 'Caja General', tipo: 'activo' },
+    { codigo: '1101', nombre: 'Caja', tipo: 'activo' },
     { codigo: '1102', nombre: 'Bancos', tipo: 'activo' },
     { codigo: '1103', nombre: 'Clientes', tipo: 'activo' },
     { codigo: '1104', nombre: 'IVA Credito Fiscal', tipo: 'activo' },
-    { codigo: '1105', nombre: 'Inventario de Mercaderias', tipo: 'activo' },
+    { codigo: '1105', nombre: 'Inventario', tipo: 'activo' },
     { codigo: '2101', nombre: 'Proveedores', tipo: 'pasivo' },
     { codigo: '2102', nombre: 'IVA Debito Fiscal', tipo: 'pasivo' },
     { codigo: '2103', nombre: 'IVA por Pagar', tipo: 'pasivo' },
-    { codigo: '2104', nombre: 'Retenciones por Pagar', tipo: 'pasivo' },
     { codigo: '3101', nombre: 'Capital Social', tipo: 'patrimonio' },
-    { codigo: '3102', nombre: 'Utilidades Retenidas', tipo: 'patrimonio' },
     { codigo: '4101', nombre: 'Ventas', tipo: 'ingreso' },
     { codigo: '5101', nombre: 'Compras', tipo: 'egreso' },
     { codigo: '5102', nombre: 'Costo de Ventas', tipo: 'egreso' },
@@ -213,16 +211,27 @@ export async function anularPartida(partidaId) {
   await batch.commit();
 }
 
-/** Trae los movimientos (Libro Mayor) de una cuenta especifica, ordenados por fecha. */
+/**
+ * Trae los movimientos (Libro Mayor) de una cuenta especifica, ordenados
+ * por fecha. Se filtra por una sola condicion de igualdad en la consulta
+ * a Firestore (cuentaId) y el resto (estado activa + orden por fecha) se
+ * hace en el navegador, para no depender de un indice compuesto en
+ * Firestore (una consulta con dos "where" + un "orderBy" en un campo
+ * distinto exige crear ese indice manualmente en la consola de Firebase).
+ */
 export async function obtenerMovimientosPorCuenta(cuentaId) {
-  const q = query(
-    colMovimientos(),
-    where('cuentaId', '==', cuentaId),
-    where('estado', '==', 'activa'),
-    orderBy('fecha', 'asc')
-  );
+  const q = query(colMovimientos(), where('cuentaId', '==', cuentaId));
   const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  return snap.docs
+    .map((d) => ({ id: d.id, ...d.data() }))
+    .filter((m) => m.estado === 'activa')
+    .sort((a, b) => aFechaMs(a.fecha) - aFechaMs(b.fecha));
+}
+
+function aFechaMs(fecha) {
+  if (fecha && typeof fecha.toMillis === 'function') return fecha.toMillis();
+  const d = new Date(fecha);
+  return Number.isNaN(d.getTime()) ? 0 : d.getTime();
 }
 
 export async function obtenerTodosLosMovimientosActivos() {
@@ -244,9 +253,16 @@ export function escucharKardex(callback) {
   });
 }
 
-/** Trae el ultimo registro de kardex (para conocer existencias y costo unitario actuales). */
+/**
+ * Trae el ultimo registro de kardex (para conocer existencias y costo
+ * unitario actuales). Se ordena por "creadoEn" (el momento real en que
+ * se guardo el registro) en vez de por "fecha" (que el usuario puede
+ * escribir libremente y no siempre coincide con el orden de captura) —
+ * ademas, usar un solo campo de orden evita tener que crear un indice
+ * compuesto en Firestore.
+ */
 export async function obtenerUltimoKardex() {
-  const q = query(colKardex(), orderBy('fecha', 'desc'), orderBy('creadoEn', 'desc'), limit(1));
+  const q = query(colKardex(), orderBy('creadoEn', 'desc'), limit(1));
   const snap = await getDocs(q);
   if (snap.empty) return null;
   return { id: snap.docs[0].id, ...snap.docs[0].data() };
