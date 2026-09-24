@@ -1,73 +1,54 @@
 // db.js
-// Capa de acceso a datos: toda la comunicacion con Firestore vive aqui.
-// Los modulos (diario.js, cuentas.js, kardex.js, cierre.js, reportes.js,
-// dashboard.js) importan estas funciones en vez de usar Firestore
-// directamente, para mantener una sola fuente de verdad del esquema.
+// Capa de acceso a datos: reemplaza las llamadas a Firestore por peticiones
+// a la API REST (que a su vez habla con PostgreSQL). Se mantienen los
+// mismos nombres de funcion que antes para no tener que tocar diario.js,
+// cuentas.js, kardex.js, cierre.js, reportes.js ni dashboard.js.
 
-import { db } from './firebaseConfig.js';
-import {
-  collection,
-  doc,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  getDoc,
-  getDocs,
-  onSnapshot,
-  query,
-  where,
-  orderBy,
-  limit,
-  writeBatch,
-  increment,
-  Timestamp,
-} from 'https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js';
-import { naturalezaCuenta, efectoSaldo, round2 } from './utils.js';
+import { apiFetch } from './api.js';
+import { naturalezaCuenta } from './utils.js';
 
 // ---------------------------------------------------------------------
 // CUENTAS (Plan de Cuentas)
 // ---------------------------------------------------------------------
 
-const colCuentas = () => collection(db, 'cuentas');
+let cuentasListener = null;
 
 export function escucharCuentas(callback) {
-  const q = query(colCuentas(), orderBy('codigo'));
-  return onSnapshot(q, (snap) => {
-    const cuentas = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-    callback(cuentas);
-  });
+  cuentasListener = callback;
+  refrescarCuentas();
+  return () => {
+    cuentasListener = null;
+  };
+}
+
+async function refrescarCuentas() {
+  const cuentas = await apiFetch('/cuentas');
+  if (cuentasListener) cuentasListener(cuentas);
+  return cuentas;
 }
 
 export async function obtenerCuentas() {
-  const snap = await getDocs(query(colCuentas(), orderBy('codigo')));
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  return apiFetch('/cuentas');
 }
 
 export async function crearCuenta({ codigo, nombre, tipo }) {
-  return addDoc(colCuentas(), {
-    codigo,
-    nombre,
-    tipo, // 'activo' | 'pasivo' | 'patrimonio' | 'ingreso' | 'egreso'
-    saldo: 0,
-    sumaDebe: 0,
-    sumaHaber: 0,
-    creadoEn: Timestamp.now(),
-  });
+  const cuenta = await apiFetch('/cuentas', { method: 'POST', body: JSON.stringify({ codigo, nombre, tipo }) });
+  await refrescarCuentas();
+  return cuenta;
 }
 
 export async function actualizarCuenta(id, cambios) {
-  return updateDoc(doc(db, 'cuentas', id), cambios);
+  const cuenta = await apiFetch(`/cuentas/${id}`, { method: 'PATCH', body: JSON.stringify(cambios) });
+  await refrescarCuentas();
+  return cuenta;
 }
 
 export async function eliminarCuenta(id) {
-  return deleteDoc(doc(db, 'cuentas', id));
+  await apiFetch(`/cuentas/${id}`, { method: 'DELETE' });
+  await refrescarCuentas();
 }
 
-/**
- * Carga un catalogo de cuentas base tipico de una empresa comercial salvadorena.
- * Codificado segun la guia de la catedra: 1=Activo, 2=Pasivo, 3=Capital,
- * 4=Costos y Gastos, 5=Ingresos (los Reportes clasifican por este digito).
- */
+/** Carga un catalogo de cuentas base tipico de una empresa comercial salvadorena. */
 export async function cargarPlanDeCuentasBase() {
   const base = [
     { codigo: '1101', nombre: 'Caja', tipo: 'activo' },
@@ -85,248 +66,96 @@ export async function cargarPlanDeCuentasBase() {
     { codigo: '4104', nombre: 'Gastos de Administracion', tipo: 'egreso' },
     { codigo: '5101', nombre: 'Ventas', tipo: 'ingreso' },
   ];
-  const batch = writeBatch(db);
-  base.forEach((cuenta) => {
-    const ref = doc(colCuentas());
-    batch.set(ref, { ...cuenta, saldo: 0, sumaDebe: 0, sumaHaber: 0, creadoEn: Timestamp.now() });
-  });
-  await batch.commit();
+  for (const cuenta of base) {
+    await apiFetch('/cuentas', { method: 'POST', body: JSON.stringify(cuenta) }).catch(() => {});
+  }
+  await refrescarCuentas();
 }
 
 // ---------------------------------------------------------------------
 // PARTIDAS (Libro Diario) + MOVIMIENTOS (detalle para Libro Mayor)
 // ---------------------------------------------------------------------
 
-const colPartidas = () => collection(db, 'partidas');
-const colMovimientos = () => collection(db, 'movimientos');
+let partidasListener = null;
 
 export function escucharPartidas(callback) {
-  const q = query(colPartidas(), orderBy('fecha', 'desc'));
-  return onSnapshot(q, (snap) => {
-    callback(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
-  });
+  partidasListener = callback;
+  refrescarPartidas();
+  return () => {
+    partidasListener = null;
+  };
+}
+
+async function refrescarPartidas() {
+  const partidas = await apiFetch('/partidas');
+  if (partidasListener) partidasListener(partidas);
+  return partidas;
 }
 
 /**
- * Registra una partida doble de forma atomica:
- * 1. Crea el documento en "partidas".
- * 2. Crea un documento en "movimientos" por cada linea (para el Libro Mayor).
- * 3. Actualiza el saldo, sumaDebe y sumaHaber de cada cuenta afectada.
- *
- * Se asume que el llamador ya valido Debe === Haber (validarCuadre en diario.js),
- * pero se vuelve a validar aqui como ultima linea de defensa.
+ * Registra una partida doble. La API valida el cuadre (Debe === Haber) y
+ * actualiza el saldo de cada cuenta dentro de una transaccion SQL.
  */
 export async function registrarPartida({ fecha, concepto, movimientos }) {
-  const totalDebe = round2(movimientos.reduce((s, m) => s + (Number(m.debe) || 0), 0));
-  const totalHaber = round2(movimientos.reduce((s, m) => s + (Number(m.haber) || 0), 0));
-  if (totalDebe !== totalHaber) {
-    throw new Error(`La partida no cuadra: Debe ${totalDebe} distinto de Haber ${totalHaber}`);
-  }
-  if (totalDebe === 0) {
-    throw new Error('La partida no puede tener montos en cero.');
-  }
-
-  // Se necesita el tipo/naturaleza de cada cuenta para actualizar su saldo.
-  const cuentasCache = new Map();
-  for (const m of movimientos) {
-    if (!cuentasCache.has(m.cuentaId)) {
-      const snap = await getDoc(doc(db, 'cuentas', m.cuentaId));
-      if (!snap.exists()) throw new Error('Una de las cuentas seleccionadas ya no existe.');
-      cuentasCache.set(m.cuentaId, snap.data());
-    }
-  }
-
-  const batch = writeBatch(db);
-  const fechaTs = Timestamp.fromDate(new Date(fecha));
-
-  const partidaRef = doc(colPartidas());
-  batch.set(partidaRef, {
-    fecha: fechaTs,
-    concepto,
-    movimientos: movimientos.map((m) => ({
-      cuentaId: m.cuentaId,
-      debe: round2(Number(m.debe) || 0),
-      haber: round2(Number(m.haber) || 0),
-    })),
-    totalDebe,
-    totalHaber,
-    estado: 'activa',
-    creadoEn: Timestamp.now(),
+  const { id } = await apiFetch('/partidas', {
+    method: 'POST',
+    body: JSON.stringify({ fecha, concepto, movimientos }),
   });
-
-  movimientos.forEach((m) => {
-    const movRef = doc(colMovimientos());
-    batch.set(movRef, {
-      partidaId: partidaRef.id,
-      cuentaId: m.cuentaId,
-      fecha: fechaTs,
-      concepto,
-      debe: round2(Number(m.debe) || 0),
-      haber: round2(Number(m.haber) || 0),
-      estado: 'activa',
-    });
-
-    const cuenta = cuentasCache.get(m.cuentaId);
-    const delta = efectoSaldo(cuenta.tipo, m.debe, m.haber);
-    batch.update(doc(db, 'cuentas', m.cuentaId), {
-      saldo: increment(delta),
-      sumaDebe: increment(round2(Number(m.debe) || 0)),
-      sumaHaber: increment(round2(Number(m.haber) || 0)),
-    });
-  });
-
-  await batch.commit();
-  return partidaRef.id;
+  await Promise.all([refrescarPartidas(), refrescarCuentas()]);
+  return id;
 }
 
 /** Anula una partida: revierte su efecto en los saldos de las cuentas afectadas. */
 export async function anularPartida(partidaId) {
-  const partidaSnap = await getDoc(doc(db, 'partidas', partidaId));
-  if (!partidaSnap.exists()) throw new Error('La partida no existe.');
-  const partida = partidaSnap.data();
-  if (partida.estado === 'anulada') throw new Error('Esta partida ya esta anulada.');
-
-  const cuentasCache = new Map();
-  for (const m of partida.movimientos) {
-    if (!cuentasCache.has(m.cuentaId)) {
-      const snap = await getDoc(doc(db, 'cuentas', m.cuentaId));
-      if (snap.exists()) cuentasCache.set(m.cuentaId, snap.data());
-    }
-  }
-
-  const movsSnap = await getDocs(query(colMovimientos(), where('partidaId', '==', partidaId)));
-
-  const batch = writeBatch(db);
-  batch.update(doc(db, 'partidas', partidaId), { estado: 'anulada' });
-  movsSnap.docs.forEach((d) => batch.update(d.ref, { estado: 'anulada' }));
-
-  partida.movimientos.forEach((m) => {
-    const cuenta = cuentasCache.get(m.cuentaId);
-    if (!cuenta) return;
-    // Efecto inverso al original para revertir el saldo.
-    const delta = -efectoSaldo(cuenta.tipo, m.debe, m.haber);
-    batch.update(doc(db, 'cuentas', m.cuentaId), {
-      saldo: increment(delta),
-      sumaDebe: increment(-round2(Number(m.debe) || 0)),
-      sumaHaber: increment(-round2(Number(m.haber) || 0)),
-    });
-  });
-
-  await batch.commit();
+  await apiFetch(`/partidas/${partidaId}/anular`, { method: 'POST' });
+  await Promise.all([refrescarPartidas(), refrescarCuentas()]);
 }
 
-/**
- * Trae los movimientos (Libro Mayor) de una cuenta especifica, ordenados
- * por fecha. Se filtra por una sola condicion de igualdad en la consulta
- * a Firestore (cuentaId) y el resto (estado activa + orden por fecha) se
- * hace en el navegador, para no depender de un indice compuesto en
- * Firestore (una consulta con dos "where" + un "orderBy" en un campo
- * distinto exige crear ese indice manualmente en la consola de Firebase).
- */
+/** Trae los movimientos (Libro Mayor) de una cuenta especifica, ordenados por fecha. */
 export async function obtenerMovimientosPorCuenta(cuentaId) {
-  const q = query(colMovimientos(), where('cuentaId', '==', cuentaId));
-  const snap = await getDocs(q);
-  return snap.docs
-    .map((d) => ({ id: d.id, ...d.data() }))
-    .filter((m) => m.estado === 'activa')
-    .sort((a, b) => aFechaMs(a.fecha) - aFechaMs(b.fecha));
-}
-
-function aFechaMs(fecha) {
-  if (fecha && typeof fecha.toMillis === 'function') return fecha.toMillis();
-  const d = new Date(fecha);
-  return Number.isNaN(d.getTime()) ? 0 : d.getTime();
+  return apiFetch(`/movimientos?cuentaId=${encodeURIComponent(cuentaId)}`);
 }
 
 export async function obtenerTodosLosMovimientosActivos() {
-  const q = query(colMovimientos(), where('estado', '==', 'activa'));
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  return apiFetch('/movimientos');
 }
 
 // ---------------------------------------------------------------------
 // KARDEX (Inventario)
 // ---------------------------------------------------------------------
 
-const colKardex = () => collection(db, 'kardex');
+let kardexListener = null;
 
 export function escucharKardex(callback) {
-  const q = query(colKardex(), orderBy('fecha', 'asc'));
-  return onSnapshot(q, (snap) => {
-    callback(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
-  });
+  kardexListener = callback;
+  refrescarKardex();
+  return () => {
+    kardexListener = null;
+  };
 }
 
-/**
- * Trae el ultimo registro de kardex (para conocer existencias y costo
- * unitario actuales). Se ordena por "creadoEn" (el momento real en que
- * se guardo el registro) en vez de por "fecha" (que el usuario puede
- * escribir libremente y no siempre coincide con el orden de captura) —
- * ademas, usar un solo campo de orden evita tener que crear un indice
- * compuesto en Firestore.
- */
+async function refrescarKardex() {
+  const kardex = await apiFetch('/kardex');
+  if (kardexListener) kardexListener(kardex);
+  return kardex;
+}
+
 export async function obtenerUltimoKardex() {
-  const q = query(colKardex(), orderBy('creadoEn', 'desc'), limit(1));
-  const snap = await getDocs(q);
-  if (snap.empty) return null;
-  return { id: snap.docs[0].id, ...snap.docs[0].data() };
+  const todos = await apiFetch('/kardex');
+  return todos.length ? todos[todos.length - 1] : null;
 }
 
 /**
  * Registra un movimiento de kardex usando el metodo de Costo Promedio
- * Ponderado (el mas usado en El Salvador para efectos de valuacion de
- * inventarios y declaracion de renta).
- *
- * - Entrada: existencias += cantidad; costoUnitario ponderado se recalcula.
- * - Salida: existencias -= cantidad; costoUnitario NO cambia (se usa el
- *   promedio vigente); se valida que haya existencias suficientes.
+ * Ponderado. El calculo real vive en el backend (src/routes/kardex.js)
+ * para que quede consistente sin importar quien lo consulte.
  */
 export async function registrarKardex({ fecha, asientoId, concepto, entrada, salida, costoUnitarioEntrada }) {
-  const anterior = await obtenerUltimoKardex();
-  const existenciasAnt = anterior?.existencias ?? 0;
-  const costoAnt = anterior?.costoUnitario ?? 0;
-
-  const cantEntrada = Number(entrada) || 0;
-  const cantSalida = Number(salida) || 0;
-
-  let nuevasExistencias;
-  let nuevoCosto;
-  let deudor = 0;
-  let acreedor = 0;
-
-  if (cantEntrada > 0) {
-    const costoEntrada = Number(costoUnitarioEntrada) || 0;
-    const valorAnterior = existenciasAnt * costoAnt;
-    const valorEntrada = cantEntrada * costoEntrada;
-    nuevasExistencias = existenciasAnt + cantEntrada;
-    nuevoCosto = nuevasExistencias > 0 ? round2((valorAnterior + valorEntrada) / nuevasExistencias) : 0;
-    deudor = round2(valorEntrada);
-  } else if (cantSalida > 0) {
-    if (cantSalida > existenciasAnt) {
-      throw new Error(`No hay existencias suficientes. Existencias actuales: ${existenciasAnt}`);
-    }
-    nuevasExistencias = existenciasAnt - cantSalida;
-    nuevoCosto = costoAnt;
-    acreedor = round2(cantSalida * costoAnt);
-  } else {
-    throw new Error('Debes indicar una cantidad de entrada o de salida.');
-  }
-
-  const saldo = round2(nuevasExistencias * nuevoCosto);
-
-  await addDoc(colKardex(), {
-    fecha: Timestamp.fromDate(new Date(fecha)),
-    asientoId: asientoId || '',
-    concepto,
-    entrada: cantEntrada,
-    salida: cantSalida,
-    existencias: round2(nuevasExistencias),
-    costoUnitario: nuevoCosto,
-    deudor,
-    acreedor,
-    saldo,
-    creadoEn: Timestamp.now(),
+  await apiFetch('/kardex', {
+    method: 'POST',
+    body: JSON.stringify({ fecha, asientoId, concepto, entrada, salida, costoUnitarioEntrada }),
   });
+  await refrescarKardex();
 }
 
 export { naturalezaCuenta };

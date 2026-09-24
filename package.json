@@ -1,31 +1,33 @@
 {
   "name": "app-contable",
-  "version": "0.1.0",
-  "description": "Aplicacion web de contabilidad - backend en Node.js/Express con Firebase (Firestore) como base de datos",
+  "version": "0.2.0",
+  "description": "Aplicacion web de contabilidad - backend en Node.js/Express con PostgreSQL",
   "main": "src/server.js",
   "type": "commonjs",
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
+    "migrate": "node src/scripts/migrate.js",
     "seed": "node src/scripts/seed.js",
     "test": "echo \"Sin tests todavia\" && exit 0"
   },
   "keywords": [
     "contabilidad",
     "accounting",
-    "firebase",
+    "postgresql",
     "express"
   ],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
-    "firebase": "^12.19.0",
-    "firebase-admin": "^12.6.0",
     "helmet": "^8.0.0",
-    "morgan": "^1.10.0"
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "pg": "^8.13.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.7"

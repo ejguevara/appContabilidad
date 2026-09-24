@@ -1,12 +1,23 @@
-const { Router } = require('express');
+// src/routes/index.js
+// Punto de entrada de la API REST bajo /api.
+// Todo requiere estar autenticado (JWT), excepto /api/auth/*.
 
-const router = Router();
+const express = require('express');
+const { requireAuth } = require('../middlewares/auth');
 
-// Punto de entrada de la API. Aqui se iran montando los modulos
-// del sistema contable (transacciones, cuentas, usuarios, reportes, etc.)
-// segun se definan en los proximos pasos del proyecto.
-router.get('/', (req, res) => {
-  res.json({ message: 'API de la aplicacion contable funcionando.' });
-});
+const authRoutes = require('./auth');
+const cuentasRoutes = require('./cuentas');
+const partidasRoutes = require('./partidas');
+const movimientosRoutes = require('./movimientos');
+const kardexRoutes = require('./kardex');
+
+const router = express.Router();
+
+router.use('/auth', authRoutes);
+
+router.use('/cuentas', requireAuth, cuentasRoutes);
+router.use('/partidas', requireAuth, partidasRoutes);
+router.use('/movimientos', requireAuth, movimientosRoutes);
+router.use('/kardex', requireAuth, kardexRoutes);
 
 module.exports = router;
