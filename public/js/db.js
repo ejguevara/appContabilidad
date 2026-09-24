@@ -63,7 +63,11 @@ export async function eliminarCuenta(id) {
   return deleteDoc(doc(db, 'cuentas', id));
 }
 
-/** Carga un catalogo de cuentas base tipico de una empresa comercial salvadorena. */
+/**
+ * Carga un catalogo de cuentas base tipico de una empresa comercial salvadorena.
+ * Codificado segun la guia de la catedra: 1=Activo, 2=Pasivo, 3=Capital,
+ * 4=Costos y Gastos, 5=Ingresos (los Reportes clasifican por este digito).
+ */
 export async function cargarPlanDeCuentasBase() {
   const base = [
     { codigo: '1101', nombre: 'Caja', tipo: 'activo' },
@@ -75,11 +79,11 @@ export async function cargarPlanDeCuentasBase() {
     { codigo: '2102', nombre: 'IVA Debito Fiscal', tipo: 'pasivo' },
     { codigo: '2103', nombre: 'IVA por Pagar', tipo: 'pasivo' },
     { codigo: '3101', nombre: 'Capital Social', tipo: 'patrimonio' },
-    { codigo: '4101', nombre: 'Ventas', tipo: 'ingreso' },
-    { codigo: '5101', nombre: 'Compras', tipo: 'egreso' },
-    { codigo: '5102', nombre: 'Costo de Ventas', tipo: 'egreso' },
-    { codigo: '6101', nombre: 'Gastos de Venta', tipo: 'egreso' },
-    { codigo: '6102', nombre: 'Gastos de Administracion', tipo: 'egreso' },
+    { codigo: '4101', nombre: 'Compras', tipo: 'egreso' },
+    { codigo: '4102', nombre: 'Costo de Ventas', tipo: 'egreso' },
+    { codigo: '4103', nombre: 'Gastos de Venta', tipo: 'egreso' },
+    { codigo: '4104', nombre: 'Gastos de Administracion', tipo: 'egreso' },
+    { codigo: '5101', nombre: 'Ventas', tipo: 'ingreso' },
   ];
   const batch = writeBatch(db);
   base.forEach((cuenta) => {

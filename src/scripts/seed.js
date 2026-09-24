@@ -43,6 +43,9 @@ function formatMoney(n) {
 // final del mes). Inventario Inicial: $2,000 (200 unidades a $10 c/u).
 // -----------------------------------------------------------------------
 
+// Codificado segun la guia de la catedra: 1=Activo, 2=Pasivo, 3=Capital,
+// 4=Costos y Gastos, 5=Ingresos. Los Estados Financieros se clasifican
+// automaticamente por este digito (ver public/js/reportes.js).
 const CUENTAS_BASE = [
   { codigo: '1101', nombre: 'Caja', tipo: 'activo' },
   { codigo: '1102', nombre: 'Bancos', tipo: 'activo' },
@@ -53,11 +56,11 @@ const CUENTAS_BASE = [
   { codigo: '2102', nombre: 'IVA Debito Fiscal', tipo: 'pasivo' },
   { codigo: '2103', nombre: 'IVA por Pagar', tipo: 'pasivo' },
   { codigo: '3101', nombre: 'Capital Social', tipo: 'patrimonio' },
-  { codigo: '4101', nombre: 'Ventas', tipo: 'ingreso' },
-  { codigo: '5101', nombre: 'Compras', tipo: 'egreso' },
-  { codigo: '5102', nombre: 'Costo de Ventas', tipo: 'egreso' },
-  { codigo: '6101', nombre: 'Gastos de Venta', tipo: 'egreso' },
-  { codigo: '6102', nombre: 'Gastos de Administracion', tipo: 'egreso' },
+  { codigo: '4101', nombre: 'Compras', tipo: 'egreso' },
+  { codigo: '4102', nombre: 'Costo de Ventas', tipo: 'egreso' },
+  { codigo: '4103', nombre: 'Gastos de Venta', tipo: 'egreso' },
+  { codigo: '4104', nombre: 'Gastos de Administracion', tipo: 'egreso' },
+  { codigo: '5101', nombre: 'Ventas', tipo: 'ingreso' },
 ];
 
 const PARTIDAS = [
@@ -74,7 +77,7 @@ const PARTIDAS = [
     fecha: '2026-08-03',
     concepto: 'Compra de mercaderia al credito',
     movimientos: [
-      { codigo: '5101', debe: 5000, haber: 0 },
+      { codigo: '4101', debe: 5000, haber: 0 },
       { codigo: '1104', debe: 650, haber: 0 },
       { codigo: '2101', debe: 0, haber: 5650 },
     ],
@@ -84,7 +87,7 @@ const PARTIDAS = [
     concepto: 'Venta de mercaderia al contado',
     movimientos: [
       { codigo: '1101', debe: 9040, haber: 0 },
-      { codigo: '4101', debe: 0, haber: 8000 },
+      { codigo: '5101', debe: 0, haber: 8000 },
       { codigo: '2102', debe: 0, haber: 1040 },
     ],
   },
@@ -101,7 +104,7 @@ const PARTIDAS = [
     concepto: 'Venta de mercaderia al credito',
     movimientos: [
       { codigo: '1103', debe: 4520, haber: 0 },
-      { codigo: '4101', debe: 0, haber: 4000 },
+      { codigo: '5101', debe: 0, haber: 4000 },
       { codigo: '2102', debe: 0, haber: 520 },
     ],
   },
@@ -117,7 +120,7 @@ const PARTIDAS = [
     fecha: '2026-08-18',
     concepto: 'Compra de mercaderia al contado',
     movimientos: [
-      { codigo: '5101', debe: 2000, haber: 0 },
+      { codigo: '4101', debe: 2000, haber: 0 },
       { codigo: '1104', debe: 260, haber: 0 },
       { codigo: '1102', debe: 0, haber: 2260 },
     ],
@@ -126,7 +129,7 @@ const PARTIDAS = [
     fecha: '2026-08-20',
     concepto: 'Pago de gastos de venta (publicidad)',
     movimientos: [
-      { codigo: '6101', debe: 350, haber: 0 },
+      { codigo: '4103', debe: 350, haber: 0 },
       { codigo: '1101', debe: 0, haber: 350 },
     ],
   },
@@ -134,7 +137,7 @@ const PARTIDAS = [
     fecha: '2026-08-22',
     concepto: 'Pago de gastos de administracion (planilla y alquiler)',
     movimientos: [
-      { codigo: '6102', debe: 1200, haber: 0 },
+      { codigo: '4104', debe: 1200, haber: 0 },
       { codigo: '1101', debe: 0, haber: 1200 },
     ],
   },
@@ -143,7 +146,7 @@ const PARTIDAS = [
     concepto: 'Venta de mercaderia al contado',
     movimientos: [
       { codigo: '1101', debe: 7345, haber: 0 },
-      { codigo: '4101', debe: 0, haber: 6500 },
+      { codigo: '5101', debe: 0, haber: 6500 },
       { codigo: '2102', debe: 0, haber: 845 },
     ],
   },
@@ -152,7 +155,7 @@ const PARTIDAS = [
     concepto: 'Venta de mercaderia al contado',
     movimientos: [
       { codigo: '1101', debe: 2034, haber: 0 },
-      { codigo: '4101', debe: 0, haber: 1800 },
+      { codigo: '5101', debe: 0, haber: 1800 },
       { codigo: '2102', debe: 0, haber: 234 },
     ],
   },
@@ -311,9 +314,9 @@ async function seed() {
   }
 
   console.log('\n✅ Datos de prueba cargados correctamente.\n');
-  console.log('En la pestaña Reportes > Estado de Resultados, usa:');
-  console.log(`  Inventario Inicial: $2,000.00`);
-  console.log(`  Inventario Final:   ${formatMoney(existenciasAnt * costoAnt)}`);
+  console.log('El Estado de Resultados y el Balance General ahora se calculan solos');
+  console.log('(por el digito del codigo de cuenta), no hace falta escribir nada a mano.');
+  console.log(`Kardex final: existencias ${existenciasAnt}, saldo ${formatMoney(existenciasAnt * costoAnt)}`);
   console.log('\nDeberias ver: Ventas $20,300 · Compras $7,000 · IVA por Pagar $1,729.00\n');
 }
 

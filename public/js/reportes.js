@@ -1,19 +1,30 @@
 // reportes.js
 // Modulo: Reportes Financieros - Balance de Comprobacion, Estado de
-// Resultados (metodo analitico) y Balance General.
+// Resultados y Balance General, clasificados automaticamente por el
+// digito inicial del codigo de cuenta (segun la guia de la catedra):
+//   1 = Activo, 2 = Pasivo, 3 = Capital, 4 = Costos y Gastos, 5 = Ingresos
+//   Balance General:      1 (activo) = 2 (pasivo) + 3 (capital)
+//   Estado de Resultados: 5 (ingresos) - 4 (costos y gastos) = utilidad
 
 import { getCuentasCache } from './cuentas.js';
 import { formatMoney, naturalezaCuenta, round2, toast } from './utils.js';
 
+/** Primer digito del codigo de cuenta (como string), p. ej. "4101" -> "4". */
+function digitoGrupo(codigo) {
+  return String(codigo || '').trim().charAt(0);
+}
+
 export function initReportes() {
   document.addEventListener('cuentas:actualizadas', () => {
     renderBalanceComprobacion();
+    renderEstadoResultados();
     renderBalanceGeneral();
   });
 
   document.getElementById('btn-generar-estado-resultados').addEventListener('click', renderEstadoResultados);
 
   renderBalanceComprobacion();
+  renderEstadoResultados();
   renderBalanceGeneral();
 }
 
@@ -99,7 +110,7 @@ function renderBalanceComprobacion() {
 }
 
 // -----------------------------------------------------------------------
-// Estado de Resultados (metodo analitico / ajustado en la cuenta Compras)
+// Estado de Resultados: codigo 5 (ingresos) - codigo 4 (costos y gastos) = utilidad
 // -----------------------------------------------------------------------
 
 function buscarCuentaPorNombre(cuentas, palabras) {
@@ -110,33 +121,33 @@ function buscarCuentaPorNombre(cuentas, palabras) {
 export function calcularEstadoResultados() {
   const cuentas = getCuentasCache();
 
-  const ventas = buscarCuentaPorNombre(cuentas, ['venta']).filter((c) => c.tipo === 'ingreso');
-  const compras = buscarCuentaPorNombre(cuentas, ['compra']).filter((c) => c.tipo === 'egreso');
-  const gastos = cuentas.filter(
-    (c) => c.tipo === 'egreso' && !buscarCuentaPorNombre([c], ['compra', 'costo de venta']).length
-  );
+  // Clasificacion automatica por digito de codigo (sin ingreso manual de nada).
+  const ingresos = cuentas.filter((c) => digitoGrupo(c.codigo) === '5');
+  const costosYGastos = cuentas.filter((c) => digitoGrupo(c.codigo) === '4');
 
-  const totalVentas = round2(ventas.reduce((s, c) => s + Math.abs(c.saldo), 0));
-  const totalCompras = round2(compras.reduce((s, c) => s + Math.abs(c.saldo), 0));
-  const totalGastos = round2(gastos.reduce((s, c) => s + Math.abs(c.saldo), 0));
+  // Dentro de "costos y gastos" (codigo 4), separamos Costo de Ventas (Compras /
+  // Costo de Venta) de los Gastos de Operacion, solo para mostrarlo mas claro
+  // en el reporte; el total de utilidad usa el grupo completo del codigo 4.
+  const costoVentasDetalle = buscarCuentaPorNombre(costosYGastos, ['compra', 'costo de venta']);
+  const gastosDetalle = costosYGastos.filter((c) => !costoVentasDetalle.includes(c));
 
-  const invInicial = Number(document.getElementById('ee-inventario-inicial')?.value) || 0;
-  const invFinal = Number(document.getElementById('ee-inventario-final')?.value) || 0;
+  const totalVentas = round2(ingresos.reduce((s, c) => s + Math.abs(c.saldo), 0));
+  const totalCostoVentas = round2(costoVentasDetalle.reduce((s, c) => s + Math.abs(c.saldo), 0));
+  const totalGastos = round2(gastosDetalle.reduce((s, c) => s + Math.abs(c.saldo), 0));
+  const totalCostosYGastos = round2(totalCostoVentas + totalGastos);
 
-  const costoVentas = round2(invInicial + totalCompras - invFinal);
-  const utilidadBruta = round2(totalVentas - costoVentas);
-  const utilidadAntesImpuestos = round2(utilidadBruta - totalGastos);
+  const utilidadBruta = round2(totalVentas - totalCostoVentas);
+  const utilidadAntesImpuestos = round2(totalVentas - totalCostosYGastos);
 
   return {
     totalVentas,
-    invInicial,
-    totalCompras,
-    invFinal,
-    costoVentas,
+    totalCostoVentas,
     utilidadBruta,
     totalGastos,
+    totalCostosYGastos,
     utilidadAntesImpuestos,
-    gastosDetalle: gastos,
+    costoVentasDetalle,
+    gastosDetalle,
   };
 }
 
@@ -144,18 +155,19 @@ function renderEstadoResultados() {
   const r = calcularEstadoResultados();
   const cont = document.getElementById('resultado-estado-resultados');
 
+  const filasCosto = r.costoVentasDetalle
+    .map((g) => `<div class="flex justify-between text-sm"><span class="text-slate-500">${g.nombre}</span><span class="font-mono">${formatMoney(Math.abs(g.saldo))}</span></div>`)
+    .join('');
   const filasGastos = r.gastosDetalle
     .map((g) => `<div class="flex justify-between text-sm"><span class="text-slate-500">${g.nombre}</span><span class="font-mono">${formatMoney(Math.abs(g.saldo))}</span></div>`)
     .join('');
 
   cont.innerHTML = `
     <div class="space-y-1 text-sm">
-      <div class="flex justify-between"><span>Ventas Netas</span><span class="font-mono">${formatMoney(r.totalVentas)}</span></div>
+      <div class="flex justify-between"><span>Ingresos (codigo 5)</span><span class="font-mono">${formatMoney(r.totalVentas)}</span></div>
       <div class="pl-3 border-l-2 border-slate-100 my-2 space-y-1 text-slate-500">
-        <div class="flex justify-between"><span>(+) Inventario Inicial</span><span class="font-mono">${formatMoney(r.invInicial)}</span></div>
-        <div class="flex justify-between"><span>(+) Compras</span><span class="font-mono">${formatMoney(r.totalCompras)}</span></div>
-        <div class="flex justify-between"><span>(-) Inventario Final</span><span class="font-mono">${formatMoney(r.invFinal)}</span></div>
-        <div class="flex justify-between font-medium text-slate-700"><span>(=) Costo de Ventas</span><span class="font-mono">${formatMoney(r.costoVentas)}</span></div>
+        <p class="text-xs uppercase text-slate-400">Costo de Ventas</p>
+        ${filasCosto || '<p class="text-xs text-slate-400">Sin costo de ventas registrado</p>'}
       </div>
       <div class="flex justify-between font-semibold border-t border-slate-200 pt-2"><span>Utilidad Bruta en Ventas</span><span class="font-mono">${formatMoney(r.utilidadBruta)}</span></div>
       <div class="pl-3 border-l-2 border-slate-100 my-2 space-y-1 text-slate-500">
@@ -163,23 +175,23 @@ function renderEstadoResultados() {
         ${filasGastos || '<p class="text-xs text-slate-400">Sin gastos registrados</p>'}
       </div>
       <div class="flex justify-between font-bold text-base border-t border-slate-200 pt-2 text-indigo-700">
-        <span>Utilidad Antes de Impuestos</span><span class="font-mono">${formatMoney(r.utilidadAntesImpuestos)}</span>
+        <span>Utilidad Antes de Impuestos (Ingresos - Costos y Gastos)</span><span class="font-mono">${formatMoney(r.utilidadAntesImpuestos)}</span>
       </div>
     </div>
   `;
 }
 
 // -----------------------------------------------------------------------
-// Balance General (Activo = Pasivo + Patrimonio)
+// Balance General: codigo 1 (activo) = codigo 2 (pasivo) + codigo 3 (capital)
 // -----------------------------------------------------------------------
 
 function renderBalanceGeneral() {
   const cuentas = getCuentasCache();
   const cont = document.getElementById('resultado-balance-general');
 
-  const activos = cuentas.filter((c) => c.tipo === 'activo');
-  const pasivos = cuentas.filter((c) => c.tipo === 'pasivo');
-  const patrimonios = cuentas.filter((c) => c.tipo === 'patrimonio');
+  const activos = cuentas.filter((c) => digitoGrupo(c.codigo) === '1');
+  const pasivos = cuentas.filter((c) => digitoGrupo(c.codigo) === '2');
+  const patrimonios = cuentas.filter((c) => digitoGrupo(c.codigo) === '3');
 
   const totalActivo = round2(activos.reduce((s, c) => s + c.saldo, 0));
   const totalPasivo = round2(pasivos.reduce((s, c) => s + c.saldo, 0));
