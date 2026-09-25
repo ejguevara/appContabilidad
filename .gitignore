@@ -9,3 +9,4 @@ coverage/
 # Credenciales de Firebase (por si se descarga el JSON del service account)
 *firebase-adminsdk*.json
 serviceAccountKey.json
+.env.example
