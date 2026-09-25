@@ -198,7 +198,7 @@ Las siguientes veces, solo inicia sesión con ese mismo correo y contraseña.
 | **Dashboard** | KPIs principales y gráficos de ventas vs. costos, gastos y estructura del activo. |
 | **Libro Diario** | Registro de partidas dobles. Valida que Debe = Haber antes de guardar. Incluye calculadora de IVA 13 %. Permite anular partidas. |
 | **Plan de Cuentas / Mayor** | Catálogo de cuentas y Libro Mayor de cada cuenta (movimientos ordenados por fecha). |
-| **Kardex** | Entradas y salidas de inventario con el método de Costo Promedio Ponderado. |
+| **Kardex** | Entradas y salidas de inventario. Se puede ver con el método de Costo Promedio Ponderado o con **PEPS** (Primeras Entradas, Primeras Salidas), e incluye el **Reporte de Rotación de Inventario** comparando ambos métodos. |
 | **Cierre e Impuestos** | Liquidación de IVA (Débito Fiscal − Crédito Fiscal) y generación automática de la partida de cierre. |
 | **Reportes** | Balance de Comprobación, Estado de Resultados y Balance General, generados automáticamente según el código de cada cuenta. |
 

@@ -119,3 +119,15 @@ export function agruparPorMes(items, fechaKey, valorFn) {
   }
   return [...mapa.entries()].sort(([a], [b]) => (a > b ? 1 : -1));
 }
+
+// Iconos SVG de linea (estilo Lucide). Usan currentColor, asi que toman el
+// color del texto donde se colocan.
+const ICONOS = {
+  check: '<path d="M20 6 9 17l-5-5"/>',
+  x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+};
+
+/** Devuelve el HTML de un icono SVG. `clase` controla tamano y alineacion. */
+export function icono(nombre, clase = 'w-4 h-4') {
+  return `<svg class="${clase}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONOS[nombre]}</svg>`;
+}

@@ -7,7 +7,7 @@
 //   Estado de Resultados: 5 (ingresos) - 4 (costos y gastos) = utilidad
 
 import { getCuentasCache } from './cuentas.js';
-import { formatMoney, naturalezaCuenta, round2, toast } from './utils.js';
+import { formatMoney, naturalezaCuenta, round2, toast, icono } from './utils.js';
 
 /** Primer digito del codigo de cuenta (como string), p. ej. "4101" -> "4". */
 function digitoGrupo(codigo) {
@@ -99,11 +99,11 @@ function renderBalanceComprobacion() {
       </tfoot>
     </table>
     <div class="mt-3 flex flex-wrap gap-2">
-      <span class="text-xs font-semibold px-2 py-1 rounded-full ${cuadraMovimientos ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
-        Movimientos ${cuadraMovimientos ? 'cuadrados ✓' : 'NO cuadran ✕'}
+      <span class="inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${cuadraMovimientos ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
+        Movimientos ${cuadraMovimientos ? `cuadrados ${icono('check', 'w-3.5 h-3.5')}` : `NO cuadran ${icono('x', 'w-3.5 h-3.5')}`}
       </span>
-      <span class="text-xs font-semibold px-2 py-1 rounded-full ${cuadraSaldos ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
-        Saldos ${cuadraSaldos ? 'cuadrados ✓' : 'NO cuadran ✕'}
+      <span class="inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${cuadraSaldos ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
+        Saldos ${cuadraSaldos ? `cuadrados ${icono('check', 'w-3.5 h-3.5')}` : `NO cuadran ${icono('x', 'w-3.5 h-3.5')}`}
       </span>
     </div>
   `;
@@ -238,8 +238,8 @@ function renderBalanceGeneral() {
       </div>
     </div>
     <div class="mt-4">
-      <span class="text-xs font-semibold px-2 py-1 rounded-full ${cuadra ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
-        Ecuacion Contable (Activo = Pasivo + Patrimonio): ${cuadra ? 'Cuadrada ✓' : 'NO cuadrada ✕'}
+      <span class="inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${cuadra ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
+        Ecuacion Contable (Activo = Pasivo + Patrimonio): ${cuadra ? `Cuadrada ${icono('check', 'w-3.5 h-3.5')}` : `NO cuadrada ${icono('x', 'w-3.5 h-3.5')}`}
       </span>
     </div>
   `;

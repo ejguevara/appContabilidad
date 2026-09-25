@@ -8,7 +8,7 @@ import {
   cargarPlanDeCuentasBase,
   obtenerMovimientosPorCuenta,
 } from './db.js';
-import { formatMoney, formatDate, naturalezaCuenta, toast } from './utils.js';
+import { formatMoney, formatDate, naturalezaCuenta, toast, icono } from './utils.js';
 
 let cuentasCache = [];
 let cuentaSeleccionadaId = null;
@@ -94,7 +94,7 @@ function renderArbolCuentas(cuentas) {
       delBtn.type = 'button';
       delBtn.className = 'ml-1 text-slate-300 hover:text-rose-500';
       delBtn.title = 'Eliminar cuenta';
-      delBtn.innerHTML = '✕';
+      delBtn.innerHTML = icono('x', 'w-3.5 h-3.5');
       delBtn.addEventListener('click', async (ev) => {
         ev.stopPropagation();
         if (Number(c.saldo) !== 0) {

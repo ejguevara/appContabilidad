@@ -3,7 +3,7 @@
 
 import { registrarPartida, escucharPartidas, anularPartida } from './db.js';
 import { getCuentasCache } from './cuentas.js';
-import { formatMoney, formatDate, hoyISO, calcularIVA, toast, round2 } from './utils.js';
+import { formatMoney, formatDate, hoyISO, calcularIVA, toast, round2, icono } from './utils.js';
 
 let partidasCache = [];
 let filaContador = 0;
@@ -58,7 +58,7 @@ function agregarLinea() {
         class="w-full rounded-md border-slate-300 text-sm text-right focus:ring-indigo-500 focus:border-indigo-500" />
     </td>
     <td class="py-1 pl-2 w-10 text-center">
-      <button type="button" class="text-slate-300 hover:text-rose-500" data-quitar>✕</button>
+      <button type="button" class="text-slate-300 hover:text-rose-500" title="Quitar linea" data-quitar>${icono('x')}</button>
     </td>
   `;
   tbody.appendChild(tr);
@@ -121,8 +121,8 @@ function actualizarCuadre() {
     badge.className = 'text-xs font-semibold px-2 py-1 rounded-full bg-slate-100 text-slate-500';
     btnGuardar.disabled = true;
   } else if (diferencia === 0) {
-    badge.textContent = 'Cuadrada ✓';
-    badge.className = 'text-xs font-semibold px-2 py-1 rounded-full bg-emerald-100 text-emerald-700';
+    badge.innerHTML = `Cuadrada ${icono('check', 'w-3.5 h-3.5')}`;
+    badge.className = 'inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full bg-emerald-100 text-emerald-700';
     btnGuardar.disabled = false;
   } else {
     badge.textContent = `Descuadre: ${formatMoney(Math.abs(diferencia))}`;
