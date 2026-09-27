@@ -16,6 +16,10 @@ Balance General) y un Dashboard con KPIs y gráficos.
 
 ---
 
+> 📘 **¿Cómo se usa la app?** Revisa el [Manual de Usuario](MANUAL_USUARIO.md), con capturas de cada módulo.
+
+---
+
 ## 1. Roles y accesos
 
 La aplicación maneja por ahora **un solo rol**: el usuario autenticado. Todo
