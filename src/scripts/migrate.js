@@ -24,8 +24,13 @@ async function ejecutarArchivo(pool, nombreArchivo) {
 async function main() {
   initDb();
   const pool = getPool();
+  const soloEsquema = process.argv.includes('--solo-schema');
   try {
     await ejecutarArchivo(pool, 'schema.sql');
+    if (soloEsquema) {
+      console.log('\n✅ Esquema actualizado (no se toco data.sql porque se uso --solo-schema).\n');
+      return;
+    }
     await ejecutarArchivo(pool, 'data.sql');
     console.log('\n✅ Migracion completada: esquema creado y datos de prueba cargados.\n');
   } finally {

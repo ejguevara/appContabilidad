@@ -2,7 +2,7 @@
 // Capa de acceso a datos: reemplaza las llamadas a Firestore por peticiones
 // a la API REST (que a su vez habla con PostgreSQL). Se mantienen los
 // mismos nombres de funcion que antes para no tener que tocar diario.js,
-// cuentas.js, kardex.js, cierre.js, reportes.js ni dashboard.js.
+// cuentas.js, kardex.js, reportes.js ni dashboard.js.
 
 import { apiFetch } from './api.js';
 import { naturalezaCuenta } from './utils.js';
@@ -56,14 +56,20 @@ export async function cargarPlanDeCuentasBase() {
     { codigo: '1103', nombre: 'Clientes', tipo: 'activo' },
     { codigo: '1104', nombre: 'IVA Credito Fiscal', tipo: 'activo' },
     { codigo: '1105', nombre: 'Inventario', tipo: 'activo' },
+    { codigo: '1106', nombre: 'IVA Retenido por Clientes', tipo: 'activo' },
+    { codigo: '1107', nombre: 'Pago a Cuenta de Renta', tipo: 'activo' },
     { codigo: '2101', nombre: 'Proveedores', tipo: 'pasivo' },
     { codigo: '2102', nombre: 'IVA Debito Fiscal', tipo: 'pasivo' },
     { codigo: '2103', nombre: 'IVA por Pagar', tipo: 'pasivo' },
+    { codigo: '2104', nombre: 'Retencion de IVA por Pagar', tipo: 'pasivo' },
+    { codigo: '2105', nombre: 'Retencion de Renta por Pagar', tipo: 'pasivo' },
+    { codigo: '2106', nombre: 'Pago a Cuenta por Pagar', tipo: 'pasivo' },
     { codigo: '3101', nombre: 'Capital Social', tipo: 'patrimonio' },
     { codigo: '4101', nombre: 'Compras', tipo: 'egreso' },
     { codigo: '4102', nombre: 'Costo de Ventas', tipo: 'egreso' },
     { codigo: '4103', nombre: 'Gastos de Venta', tipo: 'egreso' },
     { codigo: '4104', nombre: 'Gastos de Administracion', tipo: 'egreso' },
+    { codigo: '4105', nombre: 'Honorarios y Servicios Profesionales', tipo: 'egreso' },
     { codigo: '5101', nombre: 'Ventas', tipo: 'ingreso' },
   ];
   for (const cuenta of base) {
@@ -156,6 +162,34 @@ export async function registrarKardex({ fecha, asientoId, concepto, entrada, sal
     body: JSON.stringify({ fecha, asientoId, concepto, entrada, salida, costoUnitarioEntrada }),
   });
   await refrescarKardex();
+}
+
+// ---------------------------------------------------------------------
+// DOCUMENTOS (archivos de contabilidad independientes: Nuevo / Guardar / Abrir)
+// ---------------------------------------------------------------------
+
+/** Lista los documentos del usuario, del mas reciente al mas antiguo. */
+export async function listarDocumentos() {
+  return apiFetch('/documentos');
+}
+
+/** Crea un documento nuevo (catalogo de cuentas, diario y kardex vacios). */
+export async function crearDocumento(nombre) {
+  return apiFetch('/documentos', { method: 'POST', body: JSON.stringify({ nombre }) });
+}
+
+/** Le cambia el nombre a un documento existente (usado por "Guardar"). */
+export async function renombrarDocumento(id, nombre) {
+  return apiFetch(`/documentos/${id}`, { method: 'PATCH', body: JSON.stringify({ nombre }) });
+}
+
+/**
+ * Vuelve a pedir cuentas, partidas y kardex (se usa al cambiar de documento
+ * activo, para que todos los modulos ya suscritos muestren los datos del
+ * documento recien abierto).
+ */
+export async function refrescarTodo() {
+  await Promise.all([refrescarCuentas(), refrescarPartidas(), refrescarKardex()]);
 }
 
 export { naturalezaCuenta };

@@ -4,6 +4,7 @@
 
 const TOKEN_KEY = 'app_contable_token';
 const USER_KEY = 'app_contable_usuario';
+const DOC_KEY = 'app_contable_documento_id';
 
 export function getToken() {
   return localStorage.getItem(TOKEN_KEY);
@@ -25,15 +26,27 @@ export function guardarSesion(token, usuario) {
 export function cerrarSesion() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
+  localStorage.removeItem(DOC_KEY);
+}
+
+/** Id del "documento" (archivo de contabilidad) con el que se esta trabajando. */
+export function getDocumentoActivo() {
+  return localStorage.getItem(DOC_KEY);
+}
+
+export function setDocumentoActivo(id) {
+  localStorage.setItem(DOC_KEY, id);
 }
 
 export async function apiFetch(ruta, opciones = {}) {
   const token = getToken();
+  const documentoId = getDocumentoActivo();
   const headers = {
     'Content-Type': 'application/json',
     ...(opciones.headers || {}),
   };
   if (token) headers.Authorization = `Bearer ${token}`;
+  if (documentoId) headers['X-Documento-Id'] = documentoId;
 
   const resp = await fetch(`/api${ruta}`, { ...opciones, headers });
 

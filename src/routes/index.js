@@ -4,8 +4,10 @@
 
 const express = require('express');
 const { requireAuth } = require('../middlewares/auth');
+const { requireDocumento } = require('../middlewares/documento');
 
 const authRoutes = require('./auth');
+const documentosRoutes = require('./documentos');
 const cuentasRoutes = require('./cuentas');
 const partidasRoutes = require('./partidas');
 const movimientosRoutes = require('./movimientos');
@@ -15,9 +17,13 @@ const router = express.Router();
 
 router.use('/auth', authRoutes);
 
-router.use('/cuentas', requireAuth, cuentasRoutes);
-router.use('/partidas', requireAuth, partidasRoutes);
-router.use('/movimientos', requireAuth, movimientosRoutes);
-router.use('/kardex', requireAuth, kardexRoutes);
+// Documentos no lleva requireDocumento: es la ruta que sirve para elegir o
+// crear el documento con el que se va a trabajar.
+router.use('/documentos', requireAuth, documentosRoutes);
+
+router.use('/cuentas', requireAuth, requireDocumento, cuentasRoutes);
+router.use('/partidas', requireAuth, requireDocumento, partidasRoutes);
+router.use('/movimientos', requireAuth, requireDocumento, movimientosRoutes);
+router.use('/kardex', requireAuth, requireDocumento, kardexRoutes);
 
 module.exports = router;

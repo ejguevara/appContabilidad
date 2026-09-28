@@ -10,15 +10,19 @@ const router = express.Router();
 
 router.get('/', async (req, res, next) => {
   try {
-    const { rows } = await getPool().query(`
+    const { rows } = await getPool().query(
+      `
       SELECT p.*, COALESCE(json_agg(json_build_object(
         'cuentaId', m.cuenta_id, 'debe', m.debe, 'haber', m.haber
       )) FILTER (WHERE m.id IS NOT NULL), '[]') AS movimientos
       FROM partidas p
       LEFT JOIN movimientos m ON m.partida_id = p.id
+      WHERE p.documento_id = $1
       GROUP BY p.id
       ORDER BY p.fecha DESC, p.creado_en DESC
-    `);
+    `,
+      [req.documentoId]
+    );
     res.json(rows.map(mapPartida));
   } catch (err) {
     next(err);
@@ -46,17 +50,17 @@ router.post('/', async (req, res, next) => {
     await client.query('BEGIN');
 
     const { rows: cuentasRows } = await client.query(
-      'SELECT id, tipo FROM cuentas WHERE id = ANY($1::uuid[])',
-      [movimientos.map((m) => m.cuentaId)]
+      'SELECT id, tipo FROM cuentas WHERE id = ANY($1::uuid[]) AND documento_id = $2',
+      [movimientos.map((m) => m.cuentaId), req.documentoId]
     );
     const cuentasMap = new Map(cuentasRows.map((c) => [c.id, c]));
     if (cuentasMap.size !== new Set(movimientos.map((m) => m.cuentaId)).size) {
-      throw Object.assign(new Error('Una de las cuentas seleccionadas ya no existe.'), { status: 400 });
+      throw Object.assign(new Error('Una de las cuentas seleccionadas ya no existe en este documento.'), { status: 400 });
     }
 
     const { rows: partidaRows } = await client.query(
-      'INSERT INTO partidas (fecha, concepto, total_debe, total_haber) VALUES ($1, $2, $3, $4) RETURNING id',
-      [fecha, concepto, totalDebe, totalHaber]
+      'INSERT INTO partidas (documento_id, fecha, concepto, total_debe, total_haber) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+      [req.documentoId, fecha, concepto, totalDebe, totalHaber]
     );
     const partidaId = partidaRows[0].id;
 
@@ -64,8 +68,8 @@ router.post('/', async (req, res, next) => {
       const debe = round2(Number(m.debe) || 0);
       const haber = round2(Number(m.haber) || 0);
       await client.query(
-        'INSERT INTO movimientos (partida_id, cuenta_id, fecha, concepto, debe, haber) VALUES ($1, $2, $3, $4, $5, $6)',
-        [partidaId, m.cuentaId, fecha, concepto, debe, haber]
+        'INSERT INTO movimientos (documento_id, partida_id, cuenta_id, fecha, concepto, debe, haber) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+        [req.documentoId, partidaId, m.cuentaId, fecha, concepto, debe, haber]
       );
       const cuenta = cuentasMap.get(m.cuentaId);
       const delta = efectoSaldo(cuenta.tipo, debe, haber);
@@ -92,9 +96,10 @@ router.post('/:id/anular', async (req, res, next) => {
   try {
     await client.query('BEGIN');
 
-    const { rows: partidaRows } = await client.query('SELECT * FROM partidas WHERE id = $1 FOR UPDATE', [
-      req.params.id,
-    ]);
+    const { rows: partidaRows } = await client.query(
+      'SELECT * FROM partidas WHERE id = $1 AND documento_id = $2 FOR UPDATE',
+      [req.params.id, req.documentoId]
+    );
     if (!partidaRows.length) throw Object.assign(new Error('La partida no existe.'), { status: 404 });
     const partida = partidaRows[0];
     if (partida.estado === 'anulada') {
