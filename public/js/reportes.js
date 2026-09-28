@@ -32,9 +32,12 @@ export function initReportes() {
 // Balance de Comprobacion
 // -----------------------------------------------------------------------
 
-function renderBalanceComprobacion() {
+/**
+ * Filas y totales del Balance de Comprobacion. Lo usan la pantalla y la
+ * exportacion a PDF / Excel (exportar.js), asi ambos muestran lo mismo.
+ */
+export function calcularBalanceComprobacion() {
   const cuentas = getCuentasCache();
-  const cont = document.getElementById('tabla-balance-comprobacion');
 
   let totalDebe = 0;
   let totalHaber = 0;
@@ -54,24 +57,50 @@ function renderBalanceComprobacion() {
       totalSaldoDeudor += saldoDeudor;
       totalSaldoAcreedor += saldoAcreedor;
 
-      return `
-        <tr class="border-b border-slate-100">
-          <td class="px-3 py-2 text-xs font-mono text-slate-400">${c.codigo}</td>
-          <td class="px-3 py-2 text-sm">${c.nombre}</td>
-          <td class="px-3 py-2 text-sm text-right font-mono">${formatMoney(c.sumaDebe || 0)}</td>
-          <td class="px-3 py-2 text-sm text-right font-mono">${formatMoney(c.sumaHaber || 0)}</td>
-          <td class="px-3 py-2 text-sm text-right font-mono">${saldoDeudor ? formatMoney(saldoDeudor) : ''}</td>
-          <td class="px-3 py-2 text-sm text-right font-mono">${saldoAcreedor ? formatMoney(saldoAcreedor) : ''}</td>
-        </tr>`;
-    })
-    .join('');
+      return {
+        codigo: c.codigo,
+        nombre: c.nombre,
+        sumaDebe: c.sumaDebe || 0,
+        sumaHaber: c.sumaHaber || 0,
+        saldoDeudor,
+        saldoAcreedor,
+      };
+    });
 
   totalDebe = round2(totalDebe);
   totalHaber = round2(totalHaber);
   totalSaldoDeudor = round2(totalSaldoDeudor);
   totalSaldoAcreedor = round2(totalSaldoAcreedor);
-  const cuadraMovimientos = totalDebe === totalHaber;
-  const cuadraSaldos = totalSaldoDeudor === totalSaldoAcreedor;
+
+  return {
+    filas,
+    totalDebe,
+    totalHaber,
+    totalSaldoDeudor,
+    totalSaldoAcreedor,
+    cuadraMovimientos: totalDebe === totalHaber,
+    cuadraSaldos: totalSaldoDeudor === totalSaldoAcreedor,
+  };
+}
+
+function renderBalanceComprobacion() {
+  const cont = document.getElementById('tabla-balance-comprobacion');
+  const { filas: datos, totalDebe, totalHaber, totalSaldoDeudor, totalSaldoAcreedor, cuadraMovimientos, cuadraSaldos } =
+    calcularBalanceComprobacion();
+
+  const filas = datos
+    .map(
+      (f) => `
+        <tr class="border-b border-slate-100">
+          <td class="px-3 py-2 text-xs font-mono text-slate-400">${f.codigo}</td>
+          <td class="px-3 py-2 text-sm">${f.nombre}</td>
+          <td class="px-3 py-2 text-sm text-right font-mono">${formatMoney(f.sumaDebe)}</td>
+          <td class="px-3 py-2 text-sm text-right font-mono">${formatMoney(f.sumaHaber)}</td>
+          <td class="px-3 py-2 text-sm text-right font-mono">${f.saldoDeudor ? formatMoney(f.saldoDeudor) : ''}</td>
+          <td class="px-3 py-2 text-sm text-right font-mono">${f.saldoAcreedor ? formatMoney(f.saldoAcreedor) : ''}</td>
+        </tr>`
+    )
+    .join('');
 
   cont.innerHTML = `
     <table class="min-w-full">
@@ -185,9 +214,9 @@ function renderEstadoResultados() {
 // Balance General: codigo 1 (activo) = codigo 2 (pasivo) + codigo 3 (capital)
 // -----------------------------------------------------------------------
 
-function renderBalanceGeneral() {
+/** Grupos y totales del Balance General (pantalla y exportacion). */
+export function calcularBalanceGeneral() {
   const cuentas = getCuentasCache();
-  const cont = document.getElementById('resultado-balance-general');
 
   const activos = cuentas.filter((c) => digitoGrupo(c.codigo) === '1');
   const pasivos = cuentas.filter((c) => digitoGrupo(c.codigo) === '2');
@@ -200,7 +229,33 @@ function renderBalanceGeneral() {
   const { utilidadAntesImpuestos } = calcularEstadoResultados();
   const totalPatrimonio = round2(totalPatrimonioBase + utilidadAntesImpuestos);
   const totalPasivoPatrimonio = round2(totalPasivo + totalPatrimonio);
-  const cuadra = totalActivo === totalPasivoPatrimonio;
+
+  return {
+    activos,
+    pasivos,
+    patrimonios,
+    totalActivo,
+    totalPasivo,
+    utilidadAntesImpuestos,
+    totalPatrimonio,
+    totalPasivoPatrimonio,
+    cuadra: totalActivo === totalPasivoPatrimonio,
+  };
+}
+
+function renderBalanceGeneral() {
+  const cont = document.getElementById('resultado-balance-general');
+  const {
+    activos,
+    pasivos,
+    patrimonios,
+    totalActivo,
+    totalPasivo,
+    utilidadAntesImpuestos,
+    totalPatrimonio,
+    totalPasivoPatrimonio,
+    cuadra,
+  } = calcularBalanceGeneral();
 
   const listado = (items) =>
     items

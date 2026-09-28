@@ -16,6 +16,10 @@ Balance General) y un Dashboard con KPIs y gráficos.
 
 ---
 
+> 📘 **¿Cómo se usa la app?** Revisa el [Manual de Usuario](MANUAL_USUARIO.md), con capturas de cada módulo.
+
+---
+
 ## 1. Roles y accesos
 
 La aplicación maneja por ahora **un solo rol**: el usuario autenticado. Todo
@@ -199,8 +203,8 @@ Las siguientes veces, solo inicia sesión con ese mismo correo y contraseña.
 | **Libro Diario** | Registro de partidas dobles. Valida que Debe = Haber antes de guardar. Incluye calculadora de IVA 13 %. Permite anular partidas. |
 | **Plan de Cuentas / Mayor** | Catálogo de cuentas y Libro Mayor de cada cuenta (movimientos ordenados por fecha). |
 | **Kardex** | Entradas y salidas de inventario. Se puede ver con el método de Costo Promedio Ponderado o con **PEPS** (Primeras Entradas, Primeras Salidas), e incluye el **Reporte de Rotación de Inventario** comparando ambos métodos. |
-| **Cierre e Impuestos** | Liquidación de IVA (Débito Fiscal − Crédito Fiscal) y generación automática de la partida de cierre. |
-| **Reportes** | Balance de Comprobación, Estado de Resultados y Balance General, generados automáticamente según el código de cada cuenta. |
+| **Cierre e Impuestos** | Liquidación de IVA (Débito Fiscal − Crédito Fiscal) y generación automática de la partida de cierre. Incluye **Retenciones de impuestos**: IVA 1 % a proveedores y retenido por clientes (Art. 162 C.T.), Renta 10 % por servicios (Art. 156 L.I.S.R.) y Pago a cuenta 1.75 % (Art. 151 C.T.), con la partida generada automáticamente y un resumen de saldos por declarar. |
+| **Reportes** | Balance de Comprobación, Estado de Resultados y Balance General, generados automáticamente según el código de cada cuenta. Cada reporte (o los tres juntos) se puede **exportar a PDF o Excel**. |
 
 ### Codificación del catálogo de cuentas
 
@@ -244,7 +248,7 @@ appContabilidad/
 └── public/                  # Frontend (lo sirve el mismo servidor)
     ├── index.html
     ├── css/styles.css
-    └── js/                  # Un archivo por módulo (diario.js, kardex.js, reportes.js, ...)
+    └── js/                  # Un archivo por módulo (diario.js, kardex.js, reportes.js, exportar.js, retenciones.js, ...)
 ```
 
 ---

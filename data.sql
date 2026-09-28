@@ -17,14 +17,20 @@ INSERT INTO cuentas (codigo, nombre, tipo) VALUES
   ('1103', 'Clientes', 'activo'),
   ('1104', 'IVA Credito Fiscal', 'activo'),
   ('1105', 'Inventario', 'activo'),
+  ('1106', 'IVA Retenido por Clientes', 'activo'),
+  ('1107', 'Pago a Cuenta de Renta', 'activo'),
   ('2101', 'Proveedores', 'pasivo'),
   ('2102', 'IVA Debito Fiscal', 'pasivo'),
   ('2103', 'IVA por Pagar', 'pasivo'),
+  ('2104', 'Retencion de IVA por Pagar', 'pasivo'),
+  ('2105', 'Retencion de Renta por Pagar', 'pasivo'),
+  ('2106', 'Pago a Cuenta por Pagar', 'pasivo'),
   ('3101', 'Capital Social', 'patrimonio'),
   ('4101', 'Compras', 'egreso'),
   ('4102', 'Costo de Ventas', 'egreso'),
   ('4103', 'Gastos de Venta', 'egreso'),
   ('4104', 'Gastos de Administracion', 'egreso'),
+  ('4105', 'Honorarios y Servicios Profesionales', 'egreso'),
   ('5101', 'Ventas', 'ingreso')
 ON CONFLICT (codigo) DO NOTHING;
 

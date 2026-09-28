@@ -8,6 +8,8 @@ import { initDiario } from './diario.js';
 import { initKardex } from './kardex.js';
 import { initCierre } from './cierre.js';
 import { initReportes } from './reportes.js';
+import { initExportar } from './exportar.js';
+import { initRetenciones } from './retenciones.js';
 import { initDashboard } from './dashboard.js';
 
 const TABS = ['dashboard', 'diario', 'cuentas', 'kardex', 'cierre', 'reportes'];
@@ -46,7 +48,9 @@ function initApp() {
   initDiario();
   initKardex();
   initCierre();
+  initRetenciones();
   initReportes();
+  initExportar();
   initDashboard();
 }
 
