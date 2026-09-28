@@ -90,3 +90,83 @@ CREATE TABLE IF NOT EXISTS kardex (
 );
 
 CREATE INDEX IF NOT EXISTS idx_kardex_creado_en ON kardex (creado_en);
+
+-- =========================================================================
+-- DOCUMENTOS (archivos de contabilidad independientes: Nuevo / Guardar / Abrir)
+--
+-- Cada documento es su propio catalogo de cuentas + Libro Diario + Kardex,
+-- separado de los demas (antes solo se podia trabajar en uno solo). Este
+-- bloque esta escrito para poder correrse sobre una base que YA tenia datos
+-- (los de antes de agregar esta funcionalidad): agrega las columnas nuevas
+-- como opcionales, les crea un documento por defecto a los datos que ya
+-- existian, y hasta entonces las vuelve obligatorias.
+-- =========================================================================
+CREATE TABLE IF NOT EXISTS documentos (
+  id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  usuario_id     UUID NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
+  nombre         VARCHAR(150) NOT NULL,
+  creado_en      TIMESTAMPTZ NOT NULL DEFAULT now(),
+  actualizado_en TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_documentos_usuario ON documentos (usuario_id);
+
+ALTER TABLE cuentas     ADD COLUMN IF NOT EXISTS documento_id UUID REFERENCES documentos(id) ON DELETE CASCADE;
+ALTER TABLE partidas    ADD COLUMN IF NOT EXISTS documento_id UUID REFERENCES documentos(id) ON DELETE CASCADE;
+ALTER TABLE movimientos ADD COLUMN IF NOT EXISTS documento_id UUID REFERENCES documentos(id) ON DELETE CASCADE;
+ALTER TABLE kardex      ADD COLUMN IF NOT EXISTS documento_id UUID REFERENCES documentos(id) ON DELETE CASCADE;
+
+-- Si ya habia cuentas/partidas/movimientos/kardex sin documento asignado
+-- (datos de antes de esta funcionalidad), se les crea un documento por
+-- defecto ("Documento 1") a nombre del primer usuario registrado, para no
+-- perder lo que ya se habia capturado.
+DO $$
+DECLARE
+  primer_usuario UUID;
+  doc_id UUID;
+BEGIN
+  IF EXISTS (SELECT 1 FROM cuentas WHERE documento_id IS NULL)
+     OR EXISTS (SELECT 1 FROM partidas WHERE documento_id IS NULL)
+     OR EXISTS (SELECT 1 FROM movimientos WHERE documento_id IS NULL)
+     OR EXISTS (SELECT 1 FROM kardex WHERE documento_id IS NULL) THEN
+
+    SELECT id INTO primer_usuario FROM usuarios ORDER BY creado_en ASC LIMIT 1;
+
+    IF primer_usuario IS NOT NULL THEN
+      INSERT INTO documentos (usuario_id, nombre) VALUES (primer_usuario, 'Documento 1') RETURNING id INTO doc_id;
+      UPDATE cuentas SET documento_id = doc_id WHERE documento_id IS NULL;
+      UPDATE partidas SET documento_id = doc_id WHERE documento_id IS NULL;
+      UPDATE movimientos SET documento_id = doc_id WHERE documento_id IS NULL;
+      UPDATE kardex SET documento_id = doc_id WHERE documento_id IS NULL;
+    END IF;
+  END IF;
+END $$;
+
+-- Ya con todo respaldado en un documento, se puede exigir que la columna
+-- siempre venga llena.
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM cuentas WHERE documento_id IS NULL) THEN
+    ALTER TABLE cuentas ALTER COLUMN documento_id SET NOT NULL;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM partidas WHERE documento_id IS NULL) THEN
+    ALTER TABLE partidas ALTER COLUMN documento_id SET NOT NULL;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM movimientos WHERE documento_id IS NULL) THEN
+    ALTER TABLE movimientos ALTER COLUMN documento_id SET NOT NULL;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM kardex WHERE documento_id IS NULL) THEN
+    ALTER TABLE kardex ALTER COLUMN documento_id SET NOT NULL;
+  END IF;
+END $$;
+
+-- El codigo de cuenta ya no es unico en toda la base, sino unico dentro de
+-- cada documento (dos documentos distintos pueden tener ambos la 1101).
+ALTER TABLE cuentas DROP CONSTRAINT IF EXISTS cuentas_codigo_key;
+DROP INDEX IF EXISTS idx_cuentas_codigo;
+CREATE UNIQUE INDEX IF NOT EXISTS uniq_cuentas_documento_codigo ON cuentas (documento_id, codigo);
+
+CREATE INDEX IF NOT EXISTS idx_cuentas_documento ON cuentas (documento_id);
+CREATE INDEX IF NOT EXISTS idx_partidas_documento ON partidas (documento_id);
+CREATE INDEX IF NOT EXISTS idx_movimientos_documento ON movimientos (documento_id);
+CREATE INDEX IF NOT EXISTS idx_kardex_documento ON kardex (documento_id);

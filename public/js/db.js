@@ -2,7 +2,7 @@
 // Capa de acceso a datos: reemplaza las llamadas a Firestore por peticiones
 // a la API REST (que a su vez habla con PostgreSQL). Se mantienen los
 // mismos nombres de funcion que antes para no tener que tocar diario.js,
-// cuentas.js, kardex.js, cierre.js, reportes.js ni dashboard.js.
+// cuentas.js, kardex.js, reportes.js ni dashboard.js.
 
 import { apiFetch } from './api.js';
 import { naturalezaCuenta } from './utils.js';
@@ -162,6 +162,34 @@ export async function registrarKardex({ fecha, asientoId, concepto, entrada, sal
     body: JSON.stringify({ fecha, asientoId, concepto, entrada, salida, costoUnitarioEntrada }),
   });
   await refrescarKardex();
+}
+
+// ---------------------------------------------------------------------
+// DOCUMENTOS (archivos de contabilidad independientes: Nuevo / Guardar / Abrir)
+// ---------------------------------------------------------------------
+
+/** Lista los documentos del usuario, del mas reciente al mas antiguo. */
+export async function listarDocumentos() {
+  return apiFetch('/documentos');
+}
+
+/** Crea un documento nuevo (catalogo de cuentas, diario y kardex vacios). */
+export async function crearDocumento(nombre) {
+  return apiFetch('/documentos', { method: 'POST', body: JSON.stringify({ nombre }) });
+}
+
+/** Le cambia el nombre a un documento existente (usado por "Guardar"). */
+export async function renombrarDocumento(id, nombre) {
+  return apiFetch(`/documentos/${id}`, { method: 'PATCH', body: JSON.stringify({ nombre }) });
+}
+
+/**
+ * Vuelve a pedir cuentas, partidas y kardex (se usa al cambiar de documento
+ * activo, para que todos los modulos ya suscritos muestren los datos del
+ * documento recien abierto).
+ */
+export async function refrescarTodo() {
+  await Promise.all([refrescarCuentas(), refrescarPartidas(), refrescarKardex()]);
 }
 
 export { naturalezaCuenta };

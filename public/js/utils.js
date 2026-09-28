@@ -84,7 +84,7 @@ export function idCorto() {
 /** Muestra una notificacion tipo "toast" en la esquina de la pantalla. */
 export function toast(mensaje, tipo = 'info') {
   const colores = {
-    info: 'bg-slate-800',
+    info: 'bg-stone-800',
     exito: 'bg-emerald-600',
     error: 'bg-rose-600',
     advertencia: 'bg-amber-500',

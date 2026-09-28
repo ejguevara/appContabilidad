@@ -8,7 +8,9 @@ const router = express.Router();
 
 router.get('/', async (req, res, next) => {
   try {
-    const { rows } = await getPool().query('SELECT * FROM cuentas ORDER BY codigo');
+    const { rows } = await getPool().query('SELECT * FROM cuentas WHERE documento_id = $1 ORDER BY codigo', [
+      req.documentoId,
+    ]);
     res.json(rows.map(mapCuenta));
   } catch (err) {
     next(err);
@@ -22,12 +24,12 @@ router.post('/', async (req, res, next) => {
       return res.status(400).json({ error: 'codigo, nombre y tipo son obligatorios.' });
     }
     const { rows } = await getPool().query(
-      'INSERT INTO cuentas (codigo, nombre, tipo) VALUES ($1, $2, $3) RETURNING *',
-      [codigo, nombre, tipo]
+      'INSERT INTO cuentas (documento_id, codigo, nombre, tipo) VALUES ($1, $2, $3, $4) RETURNING *',
+      [req.documentoId, codigo, nombre, tipo]
     );
     res.status(201).json(mapCuenta(rows[0]));
   } catch (err) {
-    if (err.code === '23505') return res.status(409).json({ error: 'Ya existe una cuenta con ese codigo.' });
+    if (err.code === '23505') return res.status(409).json({ error: 'Ya existe una cuenta con ese codigo en este documento.' });
     next(err);
   }
 });
@@ -36,8 +38,9 @@ router.patch('/:id', async (req, res, next) => {
   try {
     const { nombre, tipo } = req.body;
     const { rows } = await getPool().query(
-      'UPDATE cuentas SET nombre = COALESCE($1, nombre), tipo = COALESCE($2, tipo) WHERE id = $3 RETURNING *',
-      [nombre || null, tipo || null, req.params.id]
+      `UPDATE cuentas SET nombre = COALESCE($1, nombre), tipo = COALESCE($2, tipo)
+       WHERE id = $3 AND documento_id = $4 RETURNING *`,
+      [nombre || null, tipo || null, req.params.id, req.documentoId]
     );
     if (!rows.length) return res.status(404).json({ error: 'Cuenta no encontrada.' });
     res.json(mapCuenta(rows[0]));
@@ -48,12 +51,15 @@ router.patch('/:id', async (req, res, next) => {
 
 router.delete('/:id', async (req, res, next) => {
   try {
-    const { rows } = await getPool().query('SELECT saldo FROM cuentas WHERE id = $1', [req.params.id]);
+    const { rows } = await getPool().query('SELECT saldo FROM cuentas WHERE id = $1 AND documento_id = $2', [
+      req.params.id,
+      req.documentoId,
+    ]);
     if (!rows.length) return res.status(404).json({ error: 'Cuenta no encontrada.' });
     if (Number(rows[0].saldo) !== 0) {
       return res.status(400).json({ error: 'No puedes eliminar una cuenta con saldo distinto de cero.' });
     }
-    await getPool().query('DELETE FROM cuentas WHERE id = $1', [req.params.id]);
+    await getPool().query('DELETE FROM cuentas WHERE id = $1 AND documento_id = $2', [req.params.id, req.documentoId]);
     res.status(204).end();
   } catch (err) {
     next(err);

@@ -2,7 +2,16 @@
    Estilos pequenos que complementan a Tailwind (cargado via CDN en index.html). */
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Tipografia "de marca": Space Grotesk para titulos y cifras destacadas
+   (KPIs del dashboard), para que la app no se sienta con la misma fuente
+   generica que el resto de dashboards hechos con Inter. */
+h1,
+h2,
+.font-display {
+  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
 table {
@@ -15,14 +24,14 @@ table {
   height: 8px;
 }
 ::-webkit-scrollbar-thumb {
-  background-color: #cbd5e1;
+  background-color: #57534e;
   border-radius: 999px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 
-/* Botones de exportar reportes (PDF / Excel) */
+/* Botones de exportar reportes (PDF / Excel) — tonos suaves sobre fondo oscuro */
 .btn-exportar {
   display: inline-flex;
   align-items: center;
@@ -35,18 +44,18 @@ table {
   transition: background-color 0.15s;
 }
 .btn-exportar-pdf {
-  border-color: #fecdd3;
-  color: #be123c;
+  border-color: #7f1d1d;
+  color: #fb7185;
 }
 .btn-exportar-pdf:hover {
-  background-color: #fff1f2;
+  background-color: rgba(251, 113, 133, 0.1);
 }
 .btn-exportar-excel {
-  border-color: #a7f3d0;
-  color: #047857;
+  border-color: #065f46;
+  color: #34d399;
 }
 .btn-exportar-excel:hover {
-  background-color: #ecfdf5;
+  background-color: rgba(52, 211, 153, 0.1);
 }
 
 @media print {

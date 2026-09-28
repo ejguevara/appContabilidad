@@ -11,6 +11,15 @@ let chartGastos = null;
 let chartActivo = null;
 
 export function initDashboard() {
+  // La app ahora vive en modo oscuro; sin esto Chart.js dibuja textos y
+  // lineas de rejilla en gris oscuro (su valor por defecto), invisibles
+  // sobre las tarjetas oscuras.
+  // eslint-disable-next-line no-undef
+  if (typeof Chart !== 'undefined') {
+    Chart.defaults.color = '#a8a29e';
+    Chart.defaults.borderColor = '#44403c';
+  }
+
   document.addEventListener('cuentas:actualizadas', () => {
     renderKPIs();
     renderDonaGastos();
@@ -42,7 +51,7 @@ function renderKPIs() {
   const diferenciaIVA = saldoDebito - saldoCredito;
 
   document.getElementById('kpi-utilidad').textContent = formatMoney(utilidadAntesImpuestos);
-  document.getElementById('kpi-utilidad').className = `text-2xl font-bold ${utilidadAntesImpuestos >= 0 ? 'text-emerald-600' : 'text-rose-600'}`;
+  document.getElementById('kpi-utilidad').className = `text-2xl font-bold ${utilidadAntesImpuestos >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
 
   document.getElementById('kpi-efectivo').textContent = formatMoney(efectivo);
 
@@ -50,10 +59,10 @@ function renderKPIs() {
   const kpiIva = document.getElementById('kpi-iva');
   if (diferenciaIVA > 0) {
     kpiIvaLabel.textContent = 'IVA por Pagar';
-    kpiIva.className = 'text-2xl font-bold text-rose-600';
+    kpiIva.className = 'text-2xl font-bold text-rose-400';
   } else {
     kpiIvaLabel.textContent = 'IVA Saldo a Favor';
-    kpiIva.className = 'text-2xl font-bold text-emerald-600';
+    kpiIva.className = 'text-2xl font-bold text-emerald-400';
   }
   kpiIva.textContent = formatMoney(Math.abs(diferenciaIVA));
 }
@@ -147,7 +156,7 @@ function renderDonaGastos() {
       datasets: [
         {
           data: gastos.length ? gastos.map((c) => Math.abs(c.saldo)) : [1],
-          backgroundColor: gastos.length ? paletaColores(gastos.length) : ['#e2e8f0'],
+          backgroundColor: gastos.length ? paletaColores(gastos.length) : ['#44403c'],
         },
       ],
     },
@@ -172,7 +181,7 @@ function renderDonaActivo() {
       datasets: [
         {
           data: activos.length ? activos.map((c) => Math.abs(c.saldo)) : [1],
-          backgroundColor: activos.length ? paletaColores(activos.length) : ['#e2e8f0'],
+          backgroundColor: activos.length ? paletaColores(activos.length) : ['#44403c'],
         },
       ],
     },

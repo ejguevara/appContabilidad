@@ -75,7 +75,7 @@ function fechaLegible() {
 // PDF
 // -----------------------------------------------------------------------
 
-const COLOR_ENCABEZADO = [79, 70, 229]; // indigo-600, igual que la app
+const COLOR_ENCABEZADO = [180, 83, 9]; // amber-700, igual que la app
 const COLOR_TEXTO_SUAVE = [100, 116, 139]; // slate-500
 
 function encabezadoPdf(doc, titulo) {

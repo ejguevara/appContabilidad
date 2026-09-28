@@ -101,10 +101,10 @@ function renderTablaKardex(registros) {
   tbody.innerHTML = registros
     .map(
       (r, i) => `
-      <tr class="border-b border-slate-100">
-        <td class="px-2 py-2 text-xs text-slate-400">${i + 1}</td>
-        <td class="px-2 py-2 text-xs text-slate-500">${r.asientoId || '-'}</td>
-        <td class="px-2 py-2 text-xs text-slate-500 whitespace-nowrap">${formatDate(r.fecha)}</td>
+      <tr class="border-b border-stone-800">
+        <td class="px-2 py-2 text-xs text-stone-500">${i + 1}</td>
+        <td class="px-2 py-2 text-xs text-stone-500">${r.asientoId || '-'}</td>
+        <td class="px-2 py-2 text-xs text-stone-500 whitespace-nowrap">${formatDate(r.fecha)}</td>
         <td class="px-2 py-2 text-sm">${r.concepto}${r.capas ? renderCapas(r.capas) : ''}</td>
         <td class="px-2 py-2 text-sm text-right font-mono">${r.entrada ? r.entrada : ''}</td>
         <td class="px-2 py-2 text-sm text-right font-mono">${r.salida ? r.salida : ''}</td>
@@ -118,7 +118,7 @@ function renderTablaKardex(registros) {
     .join('');
 
   if (registros.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="11" class="px-3 py-6 text-center text-sm text-slate-400">Aun no hay movimientos de kardex.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="11" class="px-3 py-6 text-center text-sm text-stone-500">Aun no hay movimientos de kardex.</td></tr>';
   }
 }
 
@@ -126,13 +126,13 @@ function renderCapas(capas) {
   const texto = capas.length
     ? capas.map((c) => `${c.cantidad} u × ${formatMoney(c.costo)}`).join(' · ')
     : 'Sin existencias';
-  return `<div class="text-xs text-slate-400">Lotes: ${texto}</div>`;
+  return `<div class="text-xs text-stone-500">Lotes: ${texto}</div>`;
 }
 
 function renderRotacion(cpp, peps) {
   const tbody = document.getElementById('cuerpo-rotacion-inventario');
   if (!cpp || !peps) {
-    tbody.innerHTML = '<tr><td colspan="3" class="px-3 py-6 text-center text-sm text-slate-400">Aun no hay movimientos de kardex.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="3" class="px-3 py-6 text-center text-sm text-stone-500">Aun no hay movimientos de kardex.</td></tr>';
     return;
   }
 
@@ -151,7 +151,7 @@ function renderRotacion(cpp, peps) {
   tbody.innerHTML = filas
     .map(
       ([concepto, a, b, destacado]) => `
-      <tr class="border-b border-slate-100 ${destacado ? 'font-semibold text-slate-800' : ''}">
+      <tr class="border-b border-stone-800 ${destacado ? 'font-semibold text-stone-100' : ''}">
         <td class="px-3 py-2 text-sm">${concepto}</td>
         <td class="px-3 py-2 text-sm text-right font-mono">${a}</td>
         <td class="px-3 py-2 text-sm text-right font-mono">${b}</td>

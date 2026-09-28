@@ -9,7 +9,10 @@ const router = express.Router();
 
 router.get('/', async (req, res, next) => {
   try {
-    const { rows } = await getPool().query('SELECT * FROM kardex ORDER BY fecha ASC, creado_en ASC');
+    const { rows } = await getPool().query(
+      'SELECT * FROM kardex WHERE documento_id = $1 ORDER BY fecha ASC, creado_en ASC',
+      [req.documentoId]
+    );
     res.json(rows.map(mapKardex));
   } catch (err) {
     next(err);
@@ -21,7 +24,10 @@ router.post('/', async (req, res, next) => {
     const { fecha, asientoId, concepto, entrada, salida, costoUnitarioEntrada } = req.body;
     const pool = getPool();
 
-    const { rows: ultimoRows } = await pool.query('SELECT * FROM kardex ORDER BY creado_en DESC LIMIT 1');
+    const { rows: ultimoRows } = await pool.query(
+      'SELECT * FROM kardex WHERE documento_id = $1 ORDER BY creado_en DESC LIMIT 1',
+      [req.documentoId]
+    );
     const anterior = ultimoRows[0];
     const existenciasAnt = anterior ? Number(anterior.existencias) : 0;
     const costoAnt = anterior ? Number(anterior.costo_unitario) : 0;
@@ -55,9 +61,9 @@ router.post('/', async (req, res, next) => {
     const saldo = round2(nuevasExistencias * nuevoCosto);
 
     const { rows } = await pool.query(
-      `INSERT INTO kardex (fecha, asiento_id, concepto, entrada, salida, existencias, costo_unitario, deudor, acreedor, saldo)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
-      [fecha, asientoId || null, concepto, cantEntrada, cantSalida, round2(nuevasExistencias), nuevoCosto, deudor, acreedor, saldo]
+      `INSERT INTO kardex (documento_id, fecha, asiento_id, concepto, entrada, salida, existencias, costo_unitario, deudor, acreedor, saldo)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
+      [req.documentoId, fecha, asientoId || null, concepto, cantEntrada, cantSalida, round2(nuevasExistencias), nuevoCosto, deudor, acreedor, saldo]
     );
     res.status(201).json(mapKardex(rows[0]));
   } catch (err) {

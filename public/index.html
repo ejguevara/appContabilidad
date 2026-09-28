@@ -4,6 +4,9 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>App Contable — Sistema Contable y Fiscal (El Salvador)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <!-- Exportar reportes a PDF (jsPDF + AutoTable) y a Excel (SheetJS) -->
@@ -12,37 +15,38 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <link rel="stylesheet" href="css/styles.css" />
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen">
+<body class="bg-stone-950 text-stone-100 min-h-screen">
 
   <div id="toast-container" class="fixed top-4 right-4 z-50 w-72"></div>
 
   <!-- ============ PANTALLA DE LOGIN / REGISTRO ============ -->
-  <div id="pantalla-login" class="min-h-screen flex items-center justify-center bg-slate-50 px-4">
-    <div class="w-full max-w-sm bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+  <div id="pantalla-login" class="min-h-screen flex items-center justify-center bg-stone-950 px-4">
+    <div class="w-full max-w-sm bg-stone-900 border border-stone-800 rounded-2xl shadow-lg shadow-black/40 p-7">
       <div class="text-center mb-6">
-        <h1 class="font-bold text-xl text-slate-800">App Contable</h1>
-        <p class="text-xs text-slate-400">El Salvador · IVA 13%</p>
+        <div class="w-12 h-12 rounded-xl bg-amber-500 text-stone-950 font-bold text-lg flex items-center justify-center mx-auto mb-3 shadow-sm">AC</div>
+        <h1 class="font-bold text-xl text-stone-100 tracking-tight">App Contable</h1>
+        <p class="text-xs text-stone-500 mt-0.5">El Salvador · IVA 13%</p>
       </div>
-      <h2 id="auth-titulo" class="text-lg font-semibold text-slate-700 mb-4">Iniciar sesion</h2>
+      <h2 id="auth-titulo" class="text-base font-semibold text-stone-300 mb-4">Iniciar sesion</h2>
       <form id="form-auth" class="space-y-3">
         <div>
-          <label class="text-xs font-medium text-slate-500">Correo</label>
+          <label class="text-xs font-medium text-stone-500">Correo</label>
           <input id="auth-email" type="email" required autocomplete="username" placeholder="tucorreo@ejemplo.com"
-            class="w-full mt-1 rounded-md border-slate-300 focus:ring-indigo-500 focus:border-indigo-500" />
+            class="w-full mt-1 rounded-lg border-stone-700 bg-stone-800 text-stone-100 placeholder-stone-500 focus:ring-amber-500 focus:border-amber-500" />
         </div>
         <div>
-          <label class="text-xs font-medium text-slate-500">Contraseña</label>
+          <label class="text-xs font-medium text-stone-500">Contraseña</label>
           <input id="auth-password" type="password" required autocomplete="current-password" placeholder="Minimo 6 caracteres"
-            class="w-full mt-1 rounded-md border-slate-300 focus:ring-indigo-500 focus:border-indigo-500" />
+            class="w-full mt-1 rounded-lg border-stone-700 bg-stone-800 text-stone-100 placeholder-stone-500 focus:ring-amber-500 focus:border-amber-500" />
         </div>
-        <button id="auth-submit" type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-2 rounded-lg">
+        <button id="auth-submit" type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-stone-950 text-sm font-semibold py-2.5 rounded-lg transition shadow-sm">
           Entrar
         </button>
       </form>
-      <button id="auth-toggle-modo" type="button" class="w-full text-center text-xs text-indigo-600 hover:underline mt-4">
+      <button id="auth-toggle-modo" type="button" class="w-full text-center text-xs text-amber-400 hover:underline mt-4 font-medium">
         ¿No tienes cuenta? Crea una
       </button>
-      <p class="text-xs text-slate-400 text-center mt-4">Cualquier usuario con una cuenta puede usar toda la app.</p>
+      <p class="text-xs text-stone-500 text-center mt-4">Cualquier usuario con una cuenta puede usar toda la app.</p>
     </div>
   </div>
 
@@ -50,21 +54,21 @@
   <div id="app-shell" class="hidden">
 
   <!-- Modal calculadora de IVA -->
-  <div id="iva-modal" class="hidden fixed inset-0 bg-black/40 z-40 flex items-center justify-center px-4">
-    <div class="bg-white rounded-xl shadow-xl w-full max-w-sm p-5">
+  <div id="iva-modal" class="hidden fixed inset-0 bg-stone-900/50 z-40 flex items-center justify-center px-4">
+    <div class="bg-stone-900 rounded-xl shadow-xl w-full max-w-sm p-5">
       <div class="flex justify-between items-center mb-3">
-        <h3 class="font-semibold text-slate-800">Calculadora rapida de IVA (13%)</h3>
-        <button id="iva-modal-cerrar" class="text-slate-400 hover:text-slate-600" title="Cerrar"><svg class="w-4 h-4 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+        <h3 class="font-semibold text-stone-100">Calculadora rapida de IVA (13%)</h3>
+        <button id="iva-modal-cerrar" class="text-stone-500 hover:text-stone-300" title="Cerrar"><svg class="w-4 h-4 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
       </div>
-      <label class="text-xs font-medium text-slate-500">Monto gravado (base, sin IVA)</label>
+      <label class="text-xs font-medium text-stone-500">Monto gravado (base, sin IVA)</label>
       <input id="iva-modal-base" type="number" step="0.01" min="0" placeholder="0.00"
-        class="w-full mt-1 rounded-md border-slate-300 focus:ring-indigo-500 focus:border-indigo-500" />
-      <button id="iva-modal-calcular" class="w-full mt-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-2 rounded-lg">
+        class="w-full mt-1 rounded-lg border-stone-700 bg-stone-800 text-stone-100 placeholder-stone-500 focus:ring-amber-500 focus:border-amber-500" />
+      <button id="iva-modal-calcular" class="w-full mt-3 bg-amber-500 hover:bg-amber-400 text-stone-950 text-sm font-semibold py-2 rounded-lg transition">
         Calcular
       </button>
-      <div id="iva-modal-resultado" class="hidden mt-4 space-y-1 text-sm border-t border-slate-100 pt-3">
-        <div class="flex justify-between"><span class="text-slate-500">Base gravada</span><span id="iva-res-base" class="font-mono"></span></div>
-        <div class="flex justify-between"><span class="text-slate-500">IVA (13%)</span><span id="iva-res-iva" class="font-mono"></span></div>
+      <div id="iva-modal-resultado" class="hidden mt-4 space-y-1 text-sm border-t border-stone-800 pt-3">
+        <div class="flex justify-between"><span class="text-stone-500">Base gravada</span><span id="iva-res-base" class="font-mono"></span></div>
+        <div class="flex justify-between"><span class="text-stone-500">IVA (13%)</span><span id="iva-res-iva" class="font-mono"></span></div>
         <div class="flex justify-between font-semibold"><span>Total con IVA</span><span id="iva-res-total" class="font-mono"></span></div>
       </div>
     </div>
@@ -72,22 +76,42 @@
 
   <div class="flex min-h-screen">
     <!-- Sidebar -->
-    <aside class="w-60 bg-white border-r border-slate-200 flex flex-col shrink-0">
-      <div class="p-5 border-b border-slate-100">
-        <h1 class="font-bold text-lg text-slate-800">App Contable</h1>
-        <p class="text-xs text-slate-400">El Salvador · IVA 13%</p>
+    <aside class="w-64 bg-stone-900 border-r border-stone-800 flex flex-col shrink-0">
+      <div class="p-5 border-b border-stone-800 flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-amber-500 text-stone-950 font-bold text-sm flex items-center justify-center shrink-0">AC</div>
+        <div class="min-w-0">
+          <h1 class="font-semibold text-sm text-white tracking-tight truncate">App Contable</h1>
+          <p class="text-xs text-stone-500">El Salvador · IVA 13%</p>
+        </div>
       </div>
+
+      <!-- ============ DOCUMENTOS: Nuevo / Guardar / Abrir ============ -->
+      <div class="p-3 border-b border-stone-800">
+        <p class="text-[11px] uppercase tracking-wide text-stone-500 font-medium">Documento actual</p>
+        <p id="doc-nombre-actual" class="text-sm font-medium text-white truncate mb-2">Cargando...</p>
+        <div class="flex gap-1">
+          <button id="btn-doc-nuevo" type="button" title="Crear un documento nuevo, vacio"
+            class="flex-1 text-xs px-2 py-1.5 rounded-lg border border-stone-700 text-stone-300 hover:bg-stone-800 hover:text-white transition">Nuevo</button>
+          <button id="btn-doc-guardar" type="button" title="Guardar el documento actual (le puedes cambiar el nombre)"
+            class="flex-1 text-xs px-2 py-1.5 rounded-lg border border-stone-700 text-stone-300 hover:bg-stone-800 hover:text-white transition">Guardar</button>
+          <div id="doc-selector-abrir" class="relative flex-1">
+            <button id="btn-doc-abrir" type="button" title="Abrir otro documento ya guardado"
+              class="w-full text-xs px-2 py-1.5 rounded-lg border border-stone-700 text-stone-300 hover:bg-stone-800 hover:text-white transition">Abrir</button>
+            <ul id="lista-documentos" class="hidden absolute z-30 mt-1 w-56 max-h-64 overflow-y-auto rounded-lg border border-stone-800 bg-stone-900 shadow-lg text-sm text-stone-300"></ul>
+          </div>
+        </div>
+      </div>
+
       <nav class="flex-1 p-3 space-y-1">
         <button data-tab-btn="dashboard" class="w-full flex items-center gap-2.5 text-left px-3 py-2 rounded-lg text-sm font-medium transition"><svg class="w-4 h-4 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Dashboard</button>
         <button data-tab-btn="diario" class="w-full flex items-center gap-2.5 text-left px-3 py-2 rounded-lg text-sm font-medium transition"><svg class="w-4 h-4 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>Libro Diario</button>
         <button data-tab-btn="cuentas" class="w-full flex items-center gap-2.5 text-left px-3 py-2 rounded-lg text-sm font-medium transition"><svg class="w-4 h-4 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>Plan de Cuentas / Mayor</button>
         <button data-tab-btn="kardex" class="w-full flex items-center gap-2.5 text-left px-3 py-2 rounded-lg text-sm font-medium transition"><svg class="w-4 h-4 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 7.703 4.734a2 2 0 0 0 1.994 0L20.7 7"/><path d="m7.5 4.27 9 5.15"/></svg>Kardex</button>
-        <button data-tab-btn="cierre" class="w-full flex items-center gap-2.5 text-left px-3 py-2 rounded-lg text-sm font-medium transition"><svg class="w-4 h-4 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></svg>Cierre e Impuestos</button>
         <button data-tab-btn="reportes" class="w-full flex items-center gap-2.5 text-left px-3 py-2 rounded-lg text-sm font-medium transition"><svg class="w-4 h-4 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>Reportes</button>
       </nav>
-      <div class="p-4 border-t border-slate-100">
-        <p class="text-xs text-slate-400 truncate" id="auth-user-email"></p>
-        <button id="btn-logout" type="button" class="text-xs text-rose-500 hover:underline mt-1">Cerrar sesion</button>
+      <div class="p-4 border-t border-stone-800">
+        <p class="text-xs text-stone-500 truncate" id="auth-user-email"></p>
+        <button id="btn-logout" type="button" class="text-xs text-rose-400 hover:text-rose-300 hover:underline mt-1">Cerrar sesion</button>
       </div>
     </aside>
 
@@ -97,38 +121,38 @@
       <!-- ============ DASHBOARD ============ -->
       <section id="tab-dashboard">
         <div class="flex items-center justify-between mb-5">
-          <h2 class="text-xl font-bold text-slate-800">Dashboard</h2>
-          <button id="btn-refrescar-dashboard" class="text-sm bg-white border border-slate-200 hover:bg-slate-50 px-3 py-1.5 rounded-lg">↻ Refrescar graficos</button>
+          <h2 class="text-xl font-bold text-stone-100 tracking-tight">Dashboard</h2>
+          <button id="btn-refrescar-dashboard" class="text-sm bg-stone-900 border border-stone-800 hover:bg-stone-800 px-3 py-1.5 rounded-lg shadow-sm transition">↻ Refrescar graficos</button>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-          <div class="bg-white rounded-xl border border-slate-200 p-4">
-            <p class="text-xs text-slate-400 uppercase font-medium">Utilidad Antes de Impuestos</p>
-            <p id="kpi-utilidad" class="text-2xl font-bold text-slate-800">$0.00</p>
+          <div class="bg-stone-900 rounded-xl border border-stone-800 shadow-sm p-4 border-l-4 border-l-amber-500">
+            <p class="text-xs text-stone-500 uppercase font-semibold tracking-wide">Utilidad Antes de Impuestos</p>
+            <p id="kpi-utilidad" class="font-display text-2xl font-bold text-stone-100 mt-1">$0.00</p>
           </div>
-          <div class="bg-white rounded-xl border border-slate-200 p-4">
-            <p class="text-xs text-slate-400 uppercase font-medium">Saldo en Efectivo / Bancos</p>
-            <p id="kpi-efectivo" class="text-2xl font-bold text-slate-800">$0.00</p>
+          <div class="bg-stone-900 rounded-xl border border-stone-800 shadow-sm p-4 border-l-4 border-l-amber-500">
+            <p class="text-xs text-stone-500 uppercase font-semibold tracking-wide">Saldo en Efectivo / Bancos</p>
+            <p id="kpi-efectivo" class="font-display text-2xl font-bold text-stone-100 mt-1">$0.00</p>
           </div>
-          <div class="bg-white rounded-xl border border-slate-200 p-4">
-            <p id="kpi-iva-label" class="text-xs text-slate-400 uppercase font-medium">IVA por Pagar</p>
-            <p id="kpi-iva" class="text-2xl font-bold text-slate-800">$0.00</p>
+          <div class="bg-stone-900 rounded-xl border border-stone-800 shadow-sm p-4 border-l-4 border-l-amber-500">
+            <p id="kpi-iva-label" class="text-xs text-stone-500 uppercase font-semibold tracking-wide">IVA por Pagar</p>
+            <p id="kpi-iva" class="font-display text-2xl font-bold text-stone-100 mt-1">$0.00</p>
           </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div class="bg-white rounded-xl border border-slate-200 p-4 lg:col-span-2">
-            <h3 class="font-semibold text-sm text-slate-600 mb-3">Ventas vs Costo de Ventas y Utilidad Bruta</h3>
+          <div class="bg-stone-900 rounded-xl border border-stone-800 shadow-sm p-4 lg:col-span-2">
+            <h3 class="font-semibold text-sm text-stone-300 mb-3">Ventas vs Costo de Ventas y Utilidad Bruta</h3>
             <canvas id="chart-ventas-costo" height="220"></canvas>
           </div>
-          <div class="bg-white rounded-xl border border-slate-200 p-4">
-            <h3 class="font-semibold text-sm text-slate-600 mb-3">Distribucion de Gastos de Operacion</h3>
+          <div class="bg-stone-900 rounded-xl border border-stone-800 shadow-sm p-4">
+            <h3 class="font-semibold text-sm text-stone-300 mb-3">Distribucion de Gastos de Operacion</h3>
             <canvas id="chart-gastos" height="220"></canvas>
           </div>
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
-          <div class="bg-white rounded-xl border border-slate-200 p-4">
-            <h3 class="font-semibold text-sm text-slate-600 mb-3">Estructura del Activo</h3>
+          <div class="bg-stone-900 rounded-xl border border-stone-800 shadow-sm p-4">
+            <h3 class="font-semibold text-sm text-stone-300 mb-3">Estructura del Activo</h3>
             <canvas id="chart-activo" height="220"></canvas>
           </div>
         </div>
@@ -136,24 +160,24 @@
 
       <!-- ============ LIBRO DIARIO ============ -->
       <section id="tab-diario" class="hidden">
-        <h2 class="text-xl font-bold text-slate-800 mb-5">Libro Diario — Registro de Partidas</h2>
+        <h2 class="text-xl font-bold text-stone-100 tracking-tight mb-5">Libro Diario — Registro de Partidas</h2>
 
-        <form id="form-partida" class="bg-white rounded-xl border border-slate-200 p-5 mb-6">
+        <form id="form-partida" class="bg-stone-900 rounded-xl border border-stone-800 shadow-sm p-5 mb-6">
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
             <div>
-              <label class="text-xs font-medium text-slate-500">Fecha</label>
-              <input id="diario-fecha" type="date" required class="w-full mt-1 rounded-md border-slate-300 focus:ring-indigo-500 focus:border-indigo-500" />
+              <label class="text-xs font-medium text-stone-500">Fecha</label>
+              <input id="diario-fecha" type="date" required class="w-full mt-1 rounded-lg border-stone-700 bg-stone-800 text-stone-100 placeholder-stone-500 focus:ring-amber-500 focus:border-amber-500" />
             </div>
             <div class="sm:col-span-2">
-              <label class="text-xs font-medium text-slate-500">Concepto de la partida</label>
+              <label class="text-xs font-medium text-stone-500">Concepto de la partida</label>
               <input id="diario-concepto" type="text" required placeholder="Ej. Venta de mercaderia al contado"
-                class="w-full mt-1 rounded-md border-slate-300 focus:ring-indigo-500 focus:border-indigo-500" />
+                class="w-full mt-1 rounded-lg border-stone-700 bg-stone-800 text-stone-100 placeholder-stone-500 focus:ring-amber-500 focus:border-amber-500" />
             </div>
           </div>
 
           <div class="flex justify-between items-center mb-2">
-            <h3 class="text-sm font-semibold text-slate-600">Movimientos (partida doble)</h3>
-            <button type="button" id="btn-calc-iva" class="text-xs bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 px-3 py-1.5 rounded-lg font-medium inline-flex items-center gap-1.5">
+            <h3 class="text-sm font-semibold text-stone-300">Movimientos (partida doble)</h3>
+            <button type="button" id="btn-calc-iva" class="text-xs bg-stone-800 text-stone-300 border border-stone-700 hover:bg-stone-700 px-3 py-1.5 rounded-lg font-medium inline-flex items-center gap-1.5 transition">
               <svg class="w-3.5 h-3.5 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="16" x2="16" y1="14" y2="18"/><path d="M16 10h.01"/><path d="M12 10h.01"/><path d="M8 10h.01"/><path d="M12 14h.01"/><path d="M8 14h.01"/><path d="M12 18h.01"/><path d="M8 18h.01"/></svg>
               Calcular IVA (13%)
             </button>
@@ -163,9 +187,9 @@
             <table class="min-w-full">
               <thead>
                 <tr>
-                  <th class="text-left text-xs font-semibold text-slate-500 pb-1">Cuenta</th>
-                  <th class="text-right text-xs font-semibold text-slate-500 pb-1 w-32">Debe</th>
-                  <th class="text-right text-xs font-semibold text-slate-500 pb-1 w-32">Haber</th>
+                  <th class="text-left text-xs font-semibold text-stone-500 pb-1">Cuenta</th>
+                  <th class="text-right text-xs font-semibold text-stone-500 pb-1 w-32">Debe</th>
+                  <th class="text-right text-xs font-semibold text-stone-500 pb-1 w-32">Haber</th>
                   <th class="w-10"></th>
                 </tr>
               </thead>
@@ -173,38 +197,38 @@
             </table>
           </div>
 
-          <button type="button" id="btn-agregar-linea" class="text-sm text-indigo-600 hover:underline mt-2">+ Agregar linea</button>
+          <button type="button" id="btn-agregar-linea" class="text-sm text-amber-400 hover:underline mt-2 font-medium">+ Agregar linea</button>
 
-          <div class="flex items-center justify-between mt-5 pt-4 border-t border-slate-100">
+          <div class="flex items-center justify-between mt-5 pt-4 border-t border-stone-800">
             <div class="flex gap-6 text-sm">
-              <div><span class="text-slate-400">Total Debe:</span> <span id="total-debe" class="font-mono font-semibold">$0.00</span></div>
-              <div><span class="text-slate-400">Total Haber:</span> <span id="total-haber" class="font-mono font-semibold">$0.00</span></div>
-              <span id="estado-cuadre" class="text-xs font-semibold px-2 py-1 rounded-full bg-slate-100 text-slate-500">Agrega al menos 2 lineas</span>
+              <div><span class="text-stone-500">Total Debe:</span> <span id="total-debe" class="font-mono font-semibold">$0.00</span></div>
+              <div><span class="text-stone-500">Total Haber:</span> <span id="total-haber" class="font-mono font-semibold">$0.00</span></div>
+              <span id="estado-cuadre" class="text-xs font-semibold px-2 py-1 rounded-full bg-stone-800 text-stone-500">Agrega al menos 2 lineas</span>
             </div>
             <div class="flex gap-2">
-              <button type="button" id="btn-limpiar-partida" class="text-sm px-4 py-2 rounded-lg border border-slate-200 hover:bg-slate-50">Limpiar</button>
+              <button type="button" id="btn-limpiar-partida" class="text-sm px-4 py-2 rounded-lg border border-stone-800 hover:bg-stone-800 transition">Limpiar</button>
               <button type="submit" id="btn-guardar-partida" disabled
-                class="text-sm px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-medium">
+                class="text-sm px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed text-stone-950 font-semibold transition shadow-sm">
                 Guardar Partida
               </button>
             </div>
           </div>
         </form>
 
-        <div class="bg-white rounded-xl border border-slate-200 p-5">
+        <div class="bg-stone-900 rounded-xl border border-stone-800 shadow-sm p-5">
           <div class="flex justify-between items-center mb-3">
-            <h3 class="font-semibold text-slate-700">Partidas registradas</h3>
+            <h3 class="font-semibold text-stone-300">Partidas registradas</h3>
             <input id="filtro-partidas" type="text" placeholder="Buscar por concepto, cuenta o fecha..."
-              class="text-sm rounded-md border-slate-300 focus:ring-indigo-500 focus:border-indigo-500 w-72" />
+              class="text-sm rounded-lg border-stone-700 bg-stone-800 text-stone-100 placeholder-stone-500 focus:ring-amber-500 focus:border-amber-500 w-72" />
           </div>
-          <div class="overflow-x-auto rounded-lg border border-slate-200">
+          <div class="overflow-x-auto rounded-lg border border-stone-800">
             <table class="min-w-full">
-              <thead class="bg-slate-50">
+              <thead class="bg-stone-800">
                 <tr>
-                  <th class="px-3 py-2 text-left text-xs font-semibold text-slate-500">Fecha</th>
-                  <th class="px-3 py-2 text-left text-xs font-semibold text-slate-500">Concepto / Movimientos</th>
-                  <th class="px-3 py-2 text-right text-xs font-semibold text-slate-500">Total</th>
-                  <th class="px-3 py-2 text-xs font-semibold text-slate-500">Accion</th>
+                  <th class="px-3 py-2 text-left text-xs font-semibold text-stone-500 uppercase tracking-wide">Fecha</th>
+                  <th class="px-3 py-2 text-left text-xs font-semibold text-stone-500 uppercase tracking-wide">Concepto / Movimientos</th>
+                  <th class="px-3 py-2 text-right text-xs font-semibold text-stone-500 uppercase tracking-wide">Total</th>
+                  <th class="px-3 py-2 text-xs font-semibold text-stone-500 uppercase tracking-wide">Accion</th>
                 </tr>
               </thead>
               <tbody id="cuerpo-tabla-partidas"></tbody>
@@ -215,25 +239,25 @@
 
       <!-- ============ PLAN DE CUENTAS / MAYOR ============ -->
       <section id="tab-cuentas" class="hidden">
-        <h2 class="text-xl font-bold text-slate-800 mb-5">Plan de Cuentas y Libro Mayor</h2>
+        <h2 class="text-xl font-bold text-stone-100 tracking-tight mb-5">Plan de Cuentas y Libro Mayor</h2>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
           <div class="lg:col-span-1 space-y-4">
-            <form id="form-nueva-cuenta" class="bg-white rounded-xl border border-slate-200 p-4 space-y-3">
-              <h3 class="text-sm font-semibold text-slate-600">Nueva cuenta</h3>
+            <form id="form-nueva-cuenta" class="bg-stone-900 rounded-xl border border-stone-800 shadow-sm p-4 space-y-3">
+              <h3 class="text-sm font-semibold text-stone-300">Nueva cuenta</h3>
               <div>
-                <label class="text-xs font-medium text-slate-500">Codigo</label>
+                <label class="text-xs font-medium text-stone-500">Codigo</label>
                 <input id="cuenta-codigo" type="text" required placeholder="Ej. 1101"
-                  class="w-full mt-1 rounded-md border-slate-300 focus:ring-indigo-500 focus:border-indigo-500" />
+                  class="w-full mt-1 rounded-lg border-stone-700 bg-stone-800 text-stone-100 placeholder-stone-500 focus:ring-amber-500 focus:border-amber-500" />
               </div>
               <div>
-                <label class="text-xs font-medium text-slate-500">Nombre</label>
+                <label class="text-xs font-medium text-stone-500">Nombre</label>
                 <input id="cuenta-nombre" type="text" required placeholder="Ej. Caja General"
-                  class="w-full mt-1 rounded-md border-slate-300 focus:ring-indigo-500 focus:border-indigo-500" />
+                  class="w-full mt-1 rounded-lg border-stone-700 bg-stone-800 text-stone-100 placeholder-stone-500 focus:ring-amber-500 focus:border-amber-500" />
               </div>
               <div>
-                <label class="text-xs font-medium text-slate-500">Tipo</label>
-                <select id="cuenta-tipo" required class="w-full mt-1 rounded-md border-slate-300 focus:ring-indigo-500 focus:border-indigo-500">
+                <label class="text-xs font-medium text-stone-500">Tipo</label>
+                <select id="cuenta-tipo" required class="w-full mt-1 rounded-lg border-stone-700 bg-stone-800 text-stone-100 placeholder-stone-500 focus:ring-amber-500 focus:border-amber-500">
                   <option value="">Selecciona...</option>
                   <option value="activo">Activo</option>
                   <option value="pasivo">Pasivo</option>
@@ -242,20 +266,19 @@
                   <option value="egreso">Egreso / Gasto</option>
                 </select>
               </div>
-              <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-2 rounded-lg">Crear cuenta</button>
-              <button type="button" id="btn-cargar-plan-base" class="w-full text-xs text-slate-500 hover:underline">Cargar plan de cuentas base de ejemplo</button>
+              <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-stone-950 text-sm font-semibold py-2 rounded-lg transition shadow-sm">Crear cuenta</button>
             </form>
 
-            <div class="bg-white rounded-xl border border-slate-200 p-3">
-              <h3 class="text-sm font-semibold text-slate-600 px-2 mb-1">Catalogo de cuentas</h3>
+            <div class="bg-stone-900 rounded-xl border border-stone-800 shadow-sm p-3">
+              <h3 class="text-sm font-semibold text-stone-300 px-2 mb-1">Catalogo de cuentas</h3>
               <div id="arbol-cuentas" class="max-h-[420px] overflow-y-auto"></div>
             </div>
           </div>
 
-          <div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-5">
-            <h3 class="text-sm font-semibold text-slate-600 mb-3">Libro Mayor</h3>
+          <div class="lg:col-span-2 bg-stone-900 rounded-xl border border-stone-800 shadow-sm p-5">
+            <h3 class="text-sm font-semibold text-stone-300 mb-3">Libro Mayor</h3>
             <div id="libro-mayor-contenido">
-              <p class="text-sm text-slate-400">Selecciona una cuenta del plan de cuentas para ver su Libro Mayor.</p>
+              <p class="text-sm text-stone-500">Selecciona una cuenta del plan de cuentas para ver su Libro Mayor.</p>
             </div>
           </div>
         </div>
@@ -263,87 +286,87 @@
 
       <!-- ============ KARDEX ============ -->
       <section id="tab-kardex" class="hidden">
-        <h2 class="text-xl font-bold text-slate-800 mb-5">Kardex — Control de Inventario</h2>
+        <h2 class="text-xl font-bold text-stone-100 tracking-tight mb-5">Kardex — Control de Inventario</h2>
 
-        <form id="form-kardex" class="bg-white rounded-xl border border-slate-200 p-5 mb-6 grid grid-cols-1 sm:grid-cols-6 gap-4 items-end">
+        <form id="form-kardex" class="bg-stone-900 rounded-xl border border-stone-800 shadow-sm p-5 mb-6 grid grid-cols-1 sm:grid-cols-6 gap-4 items-end">
           <div class="sm:col-span-1">
-            <label class="text-xs font-medium text-slate-500">Tipo</label>
+            <label class="text-xs font-medium text-stone-500">Tipo</label>
             <div class="flex gap-3 mt-2 text-sm">
               <label class="flex items-center gap-1"><input type="radio" name="kardex-tipo" value="entrada" checked /> Entrada</label>
               <label class="flex items-center gap-1"><input type="radio" name="kardex-tipo" value="salida" /> Salida</label>
             </div>
           </div>
           <div>
-            <label class="text-xs font-medium text-slate-500">Fecha</label>
-            <input id="kardex-fecha" type="date" required class="w-full mt-1 rounded-md border-slate-300 focus:ring-indigo-500 focus:border-indigo-500" />
+            <label class="text-xs font-medium text-stone-500">Fecha</label>
+            <input id="kardex-fecha" type="date" required class="w-full mt-1 rounded-lg border-stone-700 bg-stone-800 text-stone-100 placeholder-stone-500 focus:ring-amber-500 focus:border-amber-500" />
           </div>
           <div>
-            <label class="text-xs font-medium text-slate-500">N° Asiento (ref.)</label>
-            <input id="kardex-asiento" type="text" placeholder="Opcional" class="w-full mt-1 rounded-md border-slate-300 focus:ring-indigo-500 focus:border-indigo-500" />
+            <label class="text-xs font-medium text-stone-500">N° Asiento (ref.)</label>
+            <input id="kardex-asiento" type="text" placeholder="Opcional" class="w-full mt-1 rounded-lg border-stone-700 bg-stone-800 text-stone-100 placeholder-stone-500 focus:ring-amber-500 focus:border-amber-500" />
           </div>
           <div class="sm:col-span-2">
-            <label class="text-xs font-medium text-slate-500">Concepto</label>
+            <label class="text-xs font-medium text-stone-500">Concepto</label>
             <input id="kardex-concepto" type="text" required placeholder="Ej. Compra de mercaderia"
-              class="w-full mt-1 rounded-md border-slate-300 focus:ring-indigo-500 focus:border-indigo-500" />
+              class="w-full mt-1 rounded-lg border-stone-700 bg-stone-800 text-stone-100 placeholder-stone-500 focus:ring-amber-500 focus:border-amber-500" />
           </div>
           <div>
-            <label class="text-xs font-medium text-slate-500">Cantidad</label>
-            <input id="kardex-cantidad" type="number" step="0.01" min="0" required class="w-full mt-1 rounded-md border-slate-300 focus:ring-indigo-500 focus:border-indigo-500" />
+            <label class="text-xs font-medium text-stone-500">Cantidad</label>
+            <input id="kardex-cantidad" type="number" step="0.01" min="0" required class="w-full mt-1 rounded-lg border-stone-700 bg-stone-800 text-stone-100 placeholder-stone-500 focus:ring-amber-500 focus:border-amber-500" />
           </div>
           <div id="kardex-costo-wrap">
-            <label class="text-xs font-medium text-slate-500">Costo Unitario</label>
-            <input id="kardex-costo" type="number" step="0.0001" min="0" class="w-full mt-1 rounded-md border-slate-300 focus:ring-indigo-500 focus:border-indigo-500" />
+            <label class="text-xs font-medium text-stone-500">Costo Unitario</label>
+            <input id="kardex-costo" type="number" step="0.0001" min="0" class="w-full mt-1 rounded-lg border-stone-700 bg-stone-800 text-stone-100 placeholder-stone-500 focus:ring-amber-500 focus:border-amber-500" />
           </div>
           <div class="sm:col-span-6">
-            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium px-4 py-2 rounded-lg">Registrar movimiento</button>
+            <button type="submit" class="bg-amber-500 hover:bg-amber-400 text-stone-950 text-sm font-semibold px-4 py-2 rounded-lg transition shadow-sm">Registrar movimiento</button>
           </div>
         </form>
 
-        <div class="bg-white rounded-xl border border-slate-200 p-5 overflow-x-auto">
+        <div class="bg-stone-900 rounded-xl border border-stone-800 shadow-sm p-5 overflow-x-auto">
           <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
             <div>
-              <h3 id="kardex-metodo-titulo" class="font-semibold text-slate-700">Método: Costo Promedio Ponderado</h3>
-              <p id="kardex-metodo-nota" class="text-xs text-slate-400"></p>
+              <h3 id="kardex-metodo-titulo" class="font-semibold text-stone-300">Método: Costo Promedio Ponderado</h3>
+              <p id="kardex-metodo-nota" class="text-xs text-stone-500"></p>
             </div>
-            <label class="text-sm text-slate-600 flex items-center gap-2">
+            <label class="text-sm text-stone-300 flex items-center gap-2">
               Método de valuación
-              <select id="kardex-metodo" class="rounded-md border-slate-300 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+              <select id="kardex-metodo" class="rounded-lg border-stone-700 bg-stone-800 text-stone-100 text-sm focus:ring-amber-500 focus:border-amber-500">
                 <option value="cpp">Costo Promedio Ponderado</option>
                 <option value="peps">PEPS (Primeras Entradas, Primeras Salidas)</option>
               </select>
             </label>
           </div>
           <table class="min-w-full text-sm">
-            <thead class="bg-slate-50">
+            <thead class="bg-stone-800">
               <tr>
-                <th class="px-2 py-2 text-left text-xs font-semibold text-slate-500">#</th>
-                <th class="px-2 py-2 text-left text-xs font-semibold text-slate-500">Asiento</th>
-                <th class="px-2 py-2 text-left text-xs font-semibold text-slate-500">Fecha</th>
-                <th class="px-2 py-2 text-left text-xs font-semibold text-slate-500">Concepto</th>
-                <th class="px-2 py-2 text-right text-xs font-semibold text-slate-500">Entrada</th>
-                <th class="px-2 py-2 text-right text-xs font-semibold text-slate-500">Salida</th>
-                <th class="px-2 py-2 text-right text-xs font-semibold text-slate-500">Existencias</th>
-                <th class="px-2 py-2 text-right text-xs font-semibold text-slate-500">C/U</th>
-                <th class="px-2 py-2 text-right text-xs font-semibold text-slate-500">Deudor</th>
-                <th class="px-2 py-2 text-right text-xs font-semibold text-slate-500">Acreedor</th>
-                <th class="px-2 py-2 text-right text-xs font-semibold text-slate-500">Saldo</th>
+                <th class="px-2 py-2 text-left text-xs font-semibold text-stone-500 uppercase tracking-wide">#</th>
+                <th class="px-2 py-2 text-left text-xs font-semibold text-stone-500 uppercase tracking-wide">Asiento</th>
+                <th class="px-2 py-2 text-left text-xs font-semibold text-stone-500 uppercase tracking-wide">Fecha</th>
+                <th class="px-2 py-2 text-left text-xs font-semibold text-stone-500 uppercase tracking-wide">Concepto</th>
+                <th class="px-2 py-2 text-right text-xs font-semibold text-stone-500 uppercase tracking-wide">Entrada</th>
+                <th class="px-2 py-2 text-right text-xs font-semibold text-stone-500 uppercase tracking-wide">Salida</th>
+                <th class="px-2 py-2 text-right text-xs font-semibold text-stone-500 uppercase tracking-wide">Existencias</th>
+                <th class="px-2 py-2 text-right text-xs font-semibold text-stone-500 uppercase tracking-wide">C/U</th>
+                <th class="px-2 py-2 text-right text-xs font-semibold text-stone-500 uppercase tracking-wide">Deudor</th>
+                <th class="px-2 py-2 text-right text-xs font-semibold text-stone-500 uppercase tracking-wide">Acreedor</th>
+                <th class="px-2 py-2 text-right text-xs font-semibold text-stone-500 uppercase tracking-wide">Saldo</th>
               </tr>
             </thead>
             <tbody id="cuerpo-tabla-kardex"></tbody>
           </table>
         </div>
 
-        <div class="bg-white rounded-xl border border-slate-200 p-5 mt-6 overflow-x-auto">
-          <h3 class="font-semibold text-slate-700">Reporte de Rotación de Inventario</h3>
-          <p class="text-xs text-slate-400 mb-4">
+        <div class="bg-stone-900 rounded-xl border border-stone-800 shadow-sm p-5 mt-6 overflow-x-auto">
+          <h3 class="font-semibold text-stone-300">Reporte de Rotación de Inventario</h3>
+          <p class="text-xs text-stone-500 mb-4">
             Rotación = Costo de ventas ÷ Inventario promedio. Días de inventario = Días del período ÷ Rotación.
           </p>
           <table class="min-w-full text-sm">
-            <thead class="bg-slate-50">
+            <thead class="bg-stone-800">
               <tr>
-                <th class="px-3 py-2 text-left text-xs font-semibold text-slate-500">Concepto</th>
-                <th class="px-3 py-2 text-right text-xs font-semibold text-slate-500">Costo Promedio Ponderado</th>
-                <th class="px-3 py-2 text-right text-xs font-semibold text-slate-500">PEPS</th>
+                <th class="px-3 py-2 text-left text-xs font-semibold text-stone-500 uppercase tracking-wide">Concepto</th>
+                <th class="px-3 py-2 text-right text-xs font-semibold text-stone-500 uppercase tracking-wide">Costo Promedio Ponderado</th>
+                <th class="px-3 py-2 text-right text-xs font-semibold text-stone-500 uppercase tracking-wide">PEPS</th>
               </tr>
             </thead>
             <tbody id="cuerpo-rotacion-inventario"></tbody>
@@ -351,129 +374,20 @@
         </div>
       </section>
 
-      <!-- ============ CIERRE E IMPUESTOS ============ -->
-      <section id="tab-cierre" class="hidden space-y-6">
-        <h2 class="text-xl font-bold text-slate-800">Cierre e Impuestos</h2>
-
-        <div class="bg-white rounded-xl border border-slate-200 p-5 max-w-2xl">
-          <h3 class="font-semibold text-slate-700 mb-2">Liquidacion de IVA</h3>
-          <p class="text-sm text-slate-500 mb-4">
-            Compara el Debito Fiscal (IVA de ventas) contra el Credito Fiscal (IVA de compras) del periodo
-            y genera automaticamente la partida de liquidacion del IVA por Pagar o el Remanente/Credito Fiscal a favor.
-          </p>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label class="text-xs font-medium text-slate-500">Fecha de cierre</label>
-              <input id="cierre-fecha" type="date" class="w-full mt-1 rounded-md border-slate-300 focus:ring-indigo-500 focus:border-indigo-500" />
-            </div>
-          </div>
-
-          <div class="space-y-3 mb-4">
-            <div>
-              <label class="text-xs font-medium text-slate-500">Cuenta de IVA Debito Fiscal (ventas)</label>
-              <select id="select-iva-debito" data-cuentas-select class="w-full mt-1 rounded-md border-slate-300 focus:ring-indigo-500 focus:border-indigo-500"></select>
-            </div>
-            <div>
-              <label class="text-xs font-medium text-slate-500">Cuenta de IVA Credito Fiscal (compras)</label>
-              <select id="select-iva-credito" data-cuentas-select class="w-full mt-1 rounded-md border-slate-300 focus:ring-indigo-500 focus:border-indigo-500"></select>
-            </div>
-            <div>
-              <label class="text-xs font-medium text-slate-500">Cuenta de liquidacion (IVA por Pagar / Credito Fiscal a favor)</label>
-              <select id="select-iva-liquidacion" data-cuentas-select class="w-full mt-1 rounded-md border-slate-300 focus:ring-indigo-500 focus:border-indigo-500"></select>
-            </div>
-          </div>
-
-          <div class="flex gap-2 mb-4">
-            <button id="btn-previsualizar-cierre" type="button" class="text-sm px-4 py-2 rounded-lg border border-slate-200 hover:bg-slate-50">Calcular</button>
-            <button id="btn-generar-cierre" type="button" class="text-sm px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-medium">
-              Generar partida de cierre
-            </button>
-          </div>
-
-          <div id="resultado-cierre"></div>
-        </div>
-
-        <div class="grid grid-cols-1 2xl:grid-cols-5 gap-6 items-start max-w-4xl 2xl:max-w-none">
-          <div class="bg-white rounded-xl border border-slate-200 p-5 2xl:col-span-3">
-            <h3 class="font-semibold text-slate-700 mb-2">Retenciones de Impuestos (IVA y Renta)</h3>
-            <p class="text-sm text-slate-500 mb-4">
-              Calcula la retencion segun la normativa salvadorena y genera automaticamente la partida en el Libro Diario.
-            </p>
-
-            <div id="ret-aviso-cuentas" class="hidden mb-4 p-3 rounded-lg border border-amber-200 bg-amber-50 text-sm text-amber-800">
-              <p class="mb-2">Faltan cuentas de retencion en el catalogo: <span id="ret-cuentas-faltantes" class="font-medium"></span>.</p>
-              <button id="btn-ret-crear-cuentas" type="button" class="text-xs px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-medium">
-                Crear cuentas de retencion
-              </button>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-3">
-              <div class="sm:col-span-2">
-                <label for="ret-tipo" class="text-xs font-medium text-slate-500">Tipo de retencion</label>
-                <select id="ret-tipo" class="w-full mt-1 rounded-md border-slate-300 focus:ring-indigo-500 focus:border-indigo-500"></select>
-              </div>
-            </div>
-
-            <div class="mb-4 p-3 rounded-lg bg-slate-50 border border-slate-200 text-sm">
-              <p class="text-xs font-semibold text-slate-500 mb-1"><span id="ret-ley"></span> · Tasa: <span id="ret-tasa"></span></p>
-              <p id="ret-ayuda" class="text-slate-600"></p>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-              <div>
-                <label for="ret-fecha" class="text-xs font-medium text-slate-500">Fecha</label>
-                <input id="ret-fecha" type="date" class="w-full mt-1 rounded-md border-slate-300 focus:ring-indigo-500 focus:border-indigo-500" />
-              </div>
-              <div>
-                <label id="ret-label-base" for="ret-base" class="text-xs font-medium text-slate-500">Monto base</label>
-                <input id="ret-base" type="number" min="0" step="0.01" placeholder="0.00" class="w-full mt-1 rounded-md border-slate-300 focus:ring-indigo-500 focus:border-indigo-500" />
-              </div>
-            </div>
-
-            <div id="ret-bloque-cuentas" class="space-y-3 mb-4">
-              <div>
-                <label id="ret-label-cargo" for="ret-cargo" class="text-xs font-medium text-slate-500">Cuenta de la operacion</label>
-                <select id="ret-cargo" data-cuentas-select class="w-full mt-1 rounded-md border-slate-300 focus:ring-indigo-500 focus:border-indigo-500"></select>
-              </div>
-              <div>
-                <label id="ret-label-contra" for="ret-contra" class="text-xs font-medium text-slate-500">Cuenta de pago o cobro</label>
-                <select id="ret-contra" data-cuentas-select class="w-full mt-1 rounded-md border-slate-300 focus:ring-indigo-500 focus:border-indigo-500"></select>
-              </div>
-            </div>
-
-            <div class="flex gap-2 mb-4">
-              <button id="btn-ret-calcular" type="button" class="text-sm px-4 py-2 rounded-lg border border-slate-200 hover:bg-slate-50">Calcular</button>
-              <button id="btn-ret-registrar" type="button" disabled class="text-sm px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-medium">
-                Registrar en Libro Diario
-              </button>
-            </div>
-
-            <div id="ret-resultado"></div>
-          </div>
-
-          <div class="bg-white rounded-xl border border-slate-200 p-5 2xl:col-span-2">
-            <h3 class="font-semibold text-slate-700 mb-2">Resumen de retenciones</h3>
-            <p class="text-xs text-slate-400 mb-3">Saldos acumulados de las cuentas de retencion (se actualizan con cada partida).</p>
-            <div id="ret-resumen"></div>
-          </div>
-        </div>
-      </section>
-
       <!-- ============ REPORTES ============ -->
       <section id="tab-reportes" class="hidden space-y-6">
         <div class="flex flex-wrap items-center justify-between gap-3">
-          <h2 class="text-xl font-bold text-slate-800">Reportes Financieros</h2>
+          <h2 class="text-xl font-bold text-stone-100 tracking-tight">Reportes Financieros</h2>
           <div class="flex items-center gap-2">
-            <span class="text-xs text-slate-500">Exportar los 3 reportes:</span>
+            <span class="text-xs text-stone-500">Exportar los 3 reportes:</span>
             <button data-exportar="todos" data-formato="pdf" type="button" class="btn-exportar btn-exportar-pdf">PDF</button>
             <button data-exportar="todos" data-formato="excel" type="button" class="btn-exportar btn-exportar-excel">Excel</button>
           </div>
         </div>
 
-        <div class="bg-white rounded-xl border border-slate-200 p-5">
+        <div class="bg-stone-900 rounded-xl border border-stone-800 shadow-sm p-5">
           <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-            <h3 class="font-semibold text-slate-700">Balance de Comprobacion</h3>
+            <h3 class="font-semibold text-stone-300">Balance de Comprobacion</h3>
             <div class="flex items-center gap-2">
               <button data-exportar="comprobacion" data-formato="pdf" type="button" class="btn-exportar btn-exportar-pdf">PDF</button>
               <button data-exportar="comprobacion" data-formato="excel" type="button" class="btn-exportar btn-exportar-excel">Excel</button>
@@ -482,24 +396,24 @@
           <div id="tabla-balance-comprobacion" class="overflow-x-auto"></div>
         </div>
 
-        <div class="bg-white rounded-xl border border-slate-200 p-5">
+        <div class="bg-stone-900 rounded-xl border border-stone-800 shadow-sm p-5">
           <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-            <h3 class="font-semibold text-slate-700">Estado de Resultados</h3>
+            <h3 class="font-semibold text-stone-300">Estado de Resultados</h3>
             <div class="flex items-center gap-2">
               <button data-exportar="resultados" data-formato="pdf" type="button" class="btn-exportar btn-exportar-pdf">PDF</button>
               <button data-exportar="resultados" data-formato="excel" type="button" class="btn-exportar btn-exportar-excel">Excel</button>
-              <button id="btn-generar-estado-resultados" type="button" class="text-sm px-4 py-2 rounded-lg border border-slate-200 hover:bg-slate-50">
+              <button id="btn-generar-estado-resultados" type="button" class="text-sm px-4 py-2 rounded-lg border border-stone-800 hover:bg-stone-800 transition">
                 Recalcular
               </button>
             </div>
           </div>
-          <p class="text-xs text-slate-400 mb-3">Se calcula automaticamente por digito del codigo de cuenta: Ingresos (codigo 5) − Costos y Gastos (codigo 4) = Utilidad.</p>
+          <p class="text-xs text-stone-500 mb-3">Se calcula automaticamente por digito del codigo de cuenta: Ingresos (codigo 5) − Costos y Gastos (codigo 4) = Utilidad.</p>
           <div id="resultado-estado-resultados" class="max-w-lg"></div>
         </div>
 
-        <div class="bg-white rounded-xl border border-slate-200 p-5">
+        <div class="bg-stone-900 rounded-xl border border-stone-800 shadow-sm p-5">
           <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
-            <h3 class="font-semibold text-slate-700">Balance General</h3>
+            <h3 class="font-semibold text-stone-300">Balance General</h3>
             <div class="flex items-center gap-2">
               <button data-exportar="general" data-formato="pdf" type="button" class="btn-exportar btn-exportar-pdf">PDF</button>
               <button data-exportar="general" data-formato="excel" type="button" class="btn-exportar btn-exportar-excel">Excel</button>

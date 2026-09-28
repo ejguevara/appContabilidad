@@ -14,13 +14,15 @@ router.get('/', async (req, res, next) => {
 
     if (cuentaId) {
       const { rows } = await pool.query(
-        "SELECT * FROM movimientos WHERE cuenta_id = $1 AND estado = 'activa' ORDER BY fecha ASC",
-        [cuentaId]
+        "SELECT * FROM movimientos WHERE cuenta_id = $1 AND documento_id = $2 AND estado = 'activa' ORDER BY fecha ASC",
+        [cuentaId, req.documentoId]
       );
       return res.json(rows.map(mapMovimiento));
     }
 
-    const { rows } = await pool.query("SELECT * FROM movimientos WHERE estado = 'activa'");
+    const { rows } = await pool.query("SELECT * FROM movimientos WHERE documento_id = $1 AND estado = 'activa'", [
+      req.documentoId,
+    ]);
     res.json(rows.map(mapMovimiento));
   } catch (err) {
     next(err);

@@ -91,8 +91,8 @@ function renderBalanceComprobacion() {
   const filas = datos
     .map(
       (f) => `
-        <tr class="border-b border-slate-100">
-          <td class="px-3 py-2 text-xs font-mono text-slate-400">${f.codigo}</td>
+        <tr class="border-b border-stone-800">
+          <td class="px-3 py-2 text-xs font-mono text-stone-500">${f.codigo}</td>
           <td class="px-3 py-2 text-sm">${f.nombre}</td>
           <td class="px-3 py-2 text-sm text-right font-mono">${formatMoney(f.sumaDebe)}</td>
           <td class="px-3 py-2 text-sm text-right font-mono">${formatMoney(f.sumaHaber)}</td>
@@ -104,20 +104,20 @@ function renderBalanceComprobacion() {
 
   cont.innerHTML = `
     <table class="min-w-full">
-      <thead class="bg-slate-50">
+      <thead class="bg-stone-800">
         <tr>
-          <th class="px-3 py-2 text-left text-xs font-semibold text-slate-500">Codigo</th>
-          <th class="px-3 py-2 text-left text-xs font-semibold text-slate-500">Cuenta</th>
-          <th class="px-3 py-2 text-right text-xs font-semibold text-slate-500">Suma Debe</th>
-          <th class="px-3 py-2 text-right text-xs font-semibold text-slate-500">Suma Haber</th>
-          <th class="px-3 py-2 text-right text-xs font-semibold text-slate-500">Saldo Deudor</th>
-          <th class="px-3 py-2 text-right text-xs font-semibold text-slate-500">Saldo Acreedor</th>
+          <th class="px-3 py-2 text-left text-xs font-semibold text-stone-500">Codigo</th>
+          <th class="px-3 py-2 text-left text-xs font-semibold text-stone-500">Cuenta</th>
+          <th class="px-3 py-2 text-right text-xs font-semibold text-stone-500">Suma Debe</th>
+          <th class="px-3 py-2 text-right text-xs font-semibold text-stone-500">Suma Haber</th>
+          <th class="px-3 py-2 text-right text-xs font-semibold text-stone-500">Saldo Deudor</th>
+          <th class="px-3 py-2 text-right text-xs font-semibold text-stone-500">Saldo Acreedor</th>
         </tr>
       </thead>
       <tbody>
-        ${filas || '<tr><td colspan="6" class="px-3 py-6 text-center text-sm text-slate-400">No hay cuentas registradas.</td></tr>'}
+        ${filas || '<tr><td colspan="6" class="px-3 py-6 text-center text-sm text-stone-500">No hay cuentas registradas.</td></tr>'}
       </tbody>
-      <tfoot class="bg-slate-50 font-semibold">
+      <tfoot class="bg-stone-800 font-semibold">
         <tr>
           <td class="px-3 py-2 text-sm" colspan="2">Totales</td>
           <td class="px-3 py-2 text-sm text-right font-mono">${formatMoney(totalDebe)}</td>
@@ -128,10 +128,10 @@ function renderBalanceComprobacion() {
       </tfoot>
     </table>
     <div class="mt-3 flex flex-wrap gap-2">
-      <span class="inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${cuadraMovimientos ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
+      <span class="inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${cuadraMovimientos ? 'bg-emerald-500/15 text-emerald-400' : 'bg-rose-500/15 text-rose-400'}">
         Movimientos ${cuadraMovimientos ? `cuadrados ${icono('check', 'w-3.5 h-3.5')}` : `NO cuadran ${icono('x', 'w-3.5 h-3.5')}`}
       </span>
-      <span class="inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${cuadraSaldos ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
+      <span class="inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${cuadraSaldos ? 'bg-emerald-500/15 text-emerald-400' : 'bg-rose-500/15 text-rose-400'}">
         Saldos ${cuadraSaldos ? `cuadrados ${icono('check', 'w-3.5 h-3.5')}` : `NO cuadran ${icono('x', 'w-3.5 h-3.5')}`}
       </span>
     </div>
@@ -185,25 +185,25 @@ function renderEstadoResultados() {
   const cont = document.getElementById('resultado-estado-resultados');
 
   const filasCosto = r.costoVentasDetalle
-    .map((g) => `<div class="flex justify-between text-sm"><span class="text-slate-500">${g.nombre}</span><span class="font-mono">${formatMoney(Math.abs(g.saldo))}</span></div>`)
+    .map((g) => `<div class="flex justify-between text-sm"><span class="text-stone-500">${g.nombre}</span><span class="font-mono">${formatMoney(Math.abs(g.saldo))}</span></div>`)
     .join('');
   const filasGastos = r.gastosDetalle
-    .map((g) => `<div class="flex justify-between text-sm"><span class="text-slate-500">${g.nombre}</span><span class="font-mono">${formatMoney(Math.abs(g.saldo))}</span></div>`)
+    .map((g) => `<div class="flex justify-between text-sm"><span class="text-stone-500">${g.nombre}</span><span class="font-mono">${formatMoney(Math.abs(g.saldo))}</span></div>`)
     .join('');
 
   cont.innerHTML = `
     <div class="space-y-1 text-sm">
       <div class="flex justify-between"><span>Ingresos (codigo 5)</span><span class="font-mono">${formatMoney(r.totalVentas)}</span></div>
-      <div class="pl-3 border-l-2 border-slate-100 my-2 space-y-1 text-slate-500">
-        <p class="text-xs uppercase text-slate-400">Costo de Ventas</p>
-        ${filasCosto || '<p class="text-xs text-slate-400">Sin costo de ventas registrado</p>'}
+      <div class="pl-3 border-l-2 border-stone-800 my-2 space-y-1 text-stone-500">
+        <p class="text-xs uppercase text-stone-500">Costo de Ventas</p>
+        ${filasCosto || '<p class="text-xs text-stone-500">Sin costo de ventas registrado</p>'}
       </div>
-      <div class="flex justify-between font-semibold border-t border-slate-200 pt-2"><span>Utilidad Bruta en Ventas</span><span class="font-mono">${formatMoney(r.utilidadBruta)}</span></div>
-      <div class="pl-3 border-l-2 border-slate-100 my-2 space-y-1 text-slate-500">
-        <p class="text-xs uppercase text-slate-400">Gastos de Operacion</p>
-        ${filasGastos || '<p class="text-xs text-slate-400">Sin gastos registrados</p>'}
+      <div class="flex justify-between font-semibold border-t border-stone-800 pt-2"><span>Utilidad Bruta en Ventas</span><span class="font-mono">${formatMoney(r.utilidadBruta)}</span></div>
+      <div class="pl-3 border-l-2 border-stone-800 my-2 space-y-1 text-stone-500">
+        <p class="text-xs uppercase text-stone-500">Gastos de Operacion</p>
+        ${filasGastos || '<p class="text-xs text-stone-500">Sin gastos registrados</p>'}
       </div>
-      <div class="flex justify-between font-bold text-base border-t border-slate-200 pt-2 text-indigo-700">
+      <div class="flex justify-between font-bold text-base border-t border-stone-800 pt-2 text-amber-400">
         <span>Utilidad Antes de Impuestos (Ingresos - Costos y Gastos)</span><span class="font-mono">${formatMoney(r.utilidadAntesImpuestos)}</span>
       </div>
     </div>
@@ -259,41 +259,41 @@ function renderBalanceGeneral() {
 
   const listado = (items) =>
     items
-      .map((c) => `<div class="flex justify-between text-sm"><span class="text-slate-500">${c.codigo} - ${c.nombre}</span><span class="font-mono">${formatMoney(c.saldo)}</span></div>`)
-      .join('') || '<p class="text-xs text-slate-400">Sin cuentas</p>';
+      .map((c) => `<div class="flex justify-between text-sm"><span class="text-stone-500">${c.codigo} - ${c.nombre}</span><span class="font-mono">${formatMoney(c.saldo)}</span></div>`)
+      .join('') || '<p class="text-xs text-stone-500">Sin cuentas</p>';
 
   cont.innerHTML = `
     <div class="grid md:grid-cols-2 gap-6">
       <div>
-        <h4 class="font-semibold text-slate-700 mb-2">Activo</h4>
+        <h4 class="font-semibold text-stone-300 mb-2">Activo</h4>
         <div class="space-y-1">${listado(activos)}</div>
-        <div class="flex justify-between font-bold border-t border-slate-200 mt-2 pt-2">
+        <div class="flex justify-between font-bold border-t border-stone-800 mt-2 pt-2">
           <span>Total Activo</span><span class="font-mono">${formatMoney(totalActivo)}</span>
         </div>
       </div>
       <div>
-        <h4 class="font-semibold text-slate-700 mb-2">Pasivo</h4>
+        <h4 class="font-semibold text-stone-300 mb-2">Pasivo</h4>
         <div class="space-y-1">${listado(pasivos)}</div>
-        <div class="flex justify-between font-medium border-t border-slate-200 mt-2 pt-2">
+        <div class="flex justify-between font-medium border-t border-stone-800 mt-2 pt-2">
           <span>Total Pasivo</span><span class="font-mono">${formatMoney(totalPasivo)}</span>
         </div>
 
-        <h4 class="font-semibold text-slate-700 mb-2 mt-4">Patrimonio</h4>
+        <h4 class="font-semibold text-stone-300 mb-2 mt-4">Patrimonio</h4>
         <div class="space-y-1">${listado(patrimonios)}</div>
-        <div class="flex justify-between text-sm text-slate-500">
+        <div class="flex justify-between text-sm text-stone-500">
           <span>Utilidad del ejercicio</span><span class="font-mono">${formatMoney(utilidadAntesImpuestos)}</span>
         </div>
-        <div class="flex justify-between font-medium border-t border-slate-200 mt-2 pt-2">
+        <div class="flex justify-between font-medium border-t border-stone-800 mt-2 pt-2">
           <span>Total Patrimonio</span><span class="font-mono">${formatMoney(totalPatrimonio)}</span>
         </div>
 
-        <div class="flex justify-between font-bold border-t-2 border-slate-300 mt-3 pt-2">
+        <div class="flex justify-between font-bold border-t-2 border-stone-700 mt-3 pt-2">
           <span>Total Pasivo + Patrimonio</span><span class="font-mono">${formatMoney(totalPasivoPatrimonio)}</span>
         </div>
       </div>
     </div>
     <div class="mt-4">
-      <span class="inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${cuadra ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
+      <span class="inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full ${cuadra ? 'bg-emerald-500/15 text-emerald-400' : 'bg-rose-500/15 text-rose-400'}">
         Ecuacion Contable (Activo = Pasivo + Patrimonio): ${cuadra ? `Cuadrada ${icono('check', 'w-3.5 h-3.5')}` : `NO cuadrada ${icono('x', 'w-3.5 h-3.5')}`}
       </span>
     </div>

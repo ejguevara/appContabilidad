@@ -2,7 +2,7 @@
 // Modulo: Libro Diario (registro de partidas dobles con validacion de cuadre).
 
 import { registrarPartida, escucharPartidas, anularPartida } from './db.js';
-import { getCuentasCache } from './cuentas.js';
+import { getCuentasCache, crearBuscadorCuenta } from './cuentas.js';
 import { formatMoney, formatDate, hoyISO, calcularIVA, toast, round2, icono } from './utils.js';
 
 let partidasCache = [];
@@ -42,41 +42,29 @@ function agregarLinea() {
   const tbody = document.getElementById('cuerpo-lineas');
   const tr = document.createElement('tr');
   tr.id = id;
-  tr.className = 'border-b border-slate-100';
+  tr.className = 'border-b border-stone-800';
   tr.innerHTML = `
-    <td class="py-1 pr-2">
-      <select data-cuentas-select data-campo="cuenta" class="w-full rounded-md border-slate-300 text-sm focus:ring-indigo-500 focus:border-indigo-500">
-        <option value="">Selecciona una cuenta...</option>
-      </select>
-    </td>
+    <td class="py-1 pr-2" data-celda-cuenta></td>
     <td class="py-1 px-2 w-32">
       <input type="number" step="0.01" min="0" data-campo="debe" placeholder="0.00"
-        class="w-full rounded-md border-slate-300 text-sm text-right focus:ring-indigo-500 focus:border-indigo-500" />
+        class="w-full rounded-md border-stone-700 bg-stone-800 text-stone-100 placeholder-stone-500 text-sm text-right focus:ring-amber-500 focus:border-amber-500" />
     </td>
     <td class="py-1 px-2 w-32">
       <input type="number" step="0.01" min="0" data-campo="haber" placeholder="0.00"
-        class="w-full rounded-md border-slate-300 text-sm text-right focus:ring-indigo-500 focus:border-indigo-500" />
+        class="w-full rounded-md border-stone-700 bg-stone-800 text-stone-100 placeholder-stone-500 text-sm text-right focus:ring-amber-500 focus:border-amber-500" />
     </td>
     <td class="py-1 pl-2 w-10 text-center">
-      <button type="button" class="text-slate-300 hover:text-rose-500" title="Quitar linea" data-quitar>${icono('x')}</button>
+      <button type="button" class="text-stone-300 hover:text-rose-500" title="Quitar linea" data-quitar>${icono('x')}</button>
     </td>
   `;
   tbody.appendChild(tr);
 
-  // Repuebla el select recien creado con las cuentas ya cargadas.
-  const cuentas = getCuentasCache();
-  const select = tr.querySelector('select');
-  cuentas
-    .slice()
-    .sort((a, b) => a.codigo.localeCompare(b.codigo))
-    .forEach((c) => {
-      const opt = document.createElement('option');
-      opt.value = c.id;
-      opt.textContent = `${c.codigo} - ${c.nombre}`;
-      select.appendChild(opt);
-    });
+  // Buscador de cuentas por codigo o nombre (reemplaza el <select> simple).
+  const buscador = crearBuscadorCuenta();
+  tr.querySelector('[data-celda-cuenta]').appendChild(buscador);
 
   tr.querySelector('[data-quitar]').addEventListener('click', () => {
+    buscador._listaCuenta?.remove();
     tr.remove();
     actualizarCuadre();
   });
@@ -118,15 +106,15 @@ function actualizarCuadre() {
   const btnGuardar = document.getElementById('btn-guardar-partida');
   if (lineas.length < 2) {
     badge.textContent = 'Agrega al menos 2 lineas';
-    badge.className = 'text-xs font-semibold px-2 py-1 rounded-full bg-slate-100 text-slate-500';
+    badge.className = 'text-xs font-semibold px-2 py-1 rounded-full bg-stone-800 text-stone-500';
     btnGuardar.disabled = true;
   } else if (diferencia === 0) {
     badge.innerHTML = `Cuadrada ${icono('check', 'w-3.5 h-3.5')}`;
-    badge.className = 'inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full bg-emerald-100 text-emerald-700';
+    badge.className = 'inline-flex items-center gap-1 text-xs font-semibold px-2 py-1 rounded-full bg-emerald-500/15 text-emerald-400';
     btnGuardar.disabled = false;
   } else {
     badge.textContent = `Descuadre: ${formatMoney(Math.abs(diferencia))}`;
-    badge.className = 'text-xs font-semibold px-2 py-1 rounded-full bg-rose-100 text-rose-700';
+    badge.className = 'text-xs font-semibold px-2 py-1 rounded-full bg-rose-500/15 text-rose-400';
     btnGuardar.disabled = true;
   }
 
@@ -159,7 +147,11 @@ async function onGuardarPartida(e) {
 function resetFormulario() {
   document.getElementById('form-partida').reset();
   document.getElementById('diario-fecha').value = hoyISO();
-  document.getElementById('cuerpo-lineas').innerHTML = '';
+  const tbody = document.getElementById('cuerpo-lineas');
+  // Cada buscador de cuenta cuelga su lista desplegable directo del <body>;
+  // hay que quitarlas antes de vaciar las filas para no dejarlas huerfanas.
+  tbody.querySelectorAll('[data-celda-cuenta] > div').forEach((buscador) => buscador._listaCuenta?.remove());
+  tbody.innerHTML = '';
   filaContador = 0;
   agregarLinea();
   agregarLinea();
@@ -214,15 +206,15 @@ function renderTablaPartidas() {
         .map((m) => {
           const c = mapaCuentas.get(m.cuentaId);
           const nombre = c ? `${c.codigo} - ${c.nombre}` : 'Cuenta eliminada';
-          return `<div class="flex justify-between gap-4"><span class="text-slate-500">${nombre}</span><span class="font-mono">${m.debe ? formatMoney(m.debe) : ''} ${m.haber ? formatMoney(m.haber) : ''}</span></div>`;
+          return `<div class="flex justify-between gap-4"><span class="text-stone-500">${nombre}</span><span class="font-mono">${m.debe ? formatMoney(m.debe) : ''} ${m.haber ? formatMoney(m.haber) : ''}</span></div>`;
         })
         .join('');
       const anulada = p.estado === 'anulada';
       return `
-        <tr class="border-b border-slate-100 align-top ${anulada ? 'opacity-50' : ''}">
-          <td class="px-3 py-3 text-xs text-slate-500 whitespace-nowrap">${formatDate(p.fecha)}</td>
+        <tr class="border-b border-stone-800 align-top ${anulada ? 'opacity-50' : ''}">
+          <td class="px-3 py-3 text-xs text-stone-500 whitespace-nowrap">${formatDate(p.fecha)}</td>
           <td class="px-3 py-3 text-sm">
-            <p class="font-medium text-slate-800">${p.concepto} ${anulada ? '<span class="text-rose-500 text-xs font-semibold">(ANULADA)</span>' : ''}</p>
+            <p class="font-medium text-stone-100">${p.concepto} ${anulada ? '<span class="text-rose-500 text-xs font-semibold">(ANULADA)</span>' : ''}</p>
             <div class="text-xs mt-1 space-y-0.5">${detalle}</div>
           </td>
           <td class="px-3 py-3 text-sm text-right font-mono font-medium">${formatMoney(p.totalDebe)}</td>
@@ -250,6 +242,6 @@ function renderTablaPartidas() {
   });
 
   if (filtradas.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="4" class="px-3 py-6 text-center text-sm text-slate-400">No hay partidas registradas todavia.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="4" class="px-3 py-6 text-center text-sm text-stone-500">No hay partidas registradas todavia.</td></tr>';
   }
 }
