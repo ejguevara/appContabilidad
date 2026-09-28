@@ -1,9 +1,10 @@
 # App Contable
 
 Aplicación web de contabilidad para El Salvador. Incluye Libro Diario, Plan de
-Cuentas y Libro Mayor, Kardex de inventario, Cierre e Impuestos (liquidación de
-IVA 13 %), Reportes Financieros (Balance de Comprobación, Estado de Resultados y
-Balance General) y un Dashboard con KPIs y gráficos.
+Cuentas y Libro Mayor, Kardex de inventario, gestión de Documentos (varios
+libros contables por empresa/período), Reportes Financieros (Balance de
+Comprobación, Estado de Resultados y Balance General) y un Dashboard con KPIs
+y gráficos.
 
 **Tecnologías:**
 
@@ -28,7 +29,7 @@ módulos.
 
 | Rol | Cómo se obtiene | Módulos a los que tiene acceso | Permisos |
 |---|---|---|---|
-| **Usuario autenticado** | Registrarse con correo y contraseña e iniciar sesión | Dashboard, Libro Diario, Plan de Cuentas / Libro Mayor, Kardex, Cierre e Impuestos, Reportes | **Acceso total:** consultar, registrar, editar y anular partidas; crear, editar y eliminar cuentas; registrar movimientos de Kardex; generar la partida de cierre de IVA; ver todos los reportes. |
+| **Usuario autenticado** | Registrarse con correo y contraseña e iniciar sesión | Dashboard, Libro Diario, Plan de Cuentas / Libro Mayor, Kardex, Documentos, Reportes | **Acceso total:** consultar, registrar, editar y anular partidas; crear, editar y eliminar cuentas; registrar movimientos de Kardex; crear y cambiar entre Documentos (libros contables); ver todos los reportes. |
 
 Quien no ha iniciado sesión no tiene ningún rol: solo ve la pantalla de acceso
 (registrarse o iniciar sesión) y no puede ver ni modificar datos contables.
@@ -203,7 +204,7 @@ Las siguientes veces, solo inicia sesión con ese mismo correo y contraseña.
 | **Libro Diario** | Registro de partidas dobles. Valida que Debe = Haber antes de guardar. Incluye calculadora de IVA 13 %. Permite anular partidas. |
 | **Plan de Cuentas / Mayor** | Catálogo de cuentas y Libro Mayor de cada cuenta (movimientos ordenados por fecha). |
 | **Kardex** | Entradas y salidas de inventario. Se puede ver con el método de Costo Promedio Ponderado o con **PEPS** (Primeras Entradas, Primeras Salidas). |
-| **Cierre e Impuestos** | Liquidación de IVA (Débito Fiscal − Crédito Fiscal) y generación automática de la partida de cierre. Incluye **Retenciones de impuestos**: IVA 1 % a proveedores y retenido por clientes (Art. 162 C.T.), Renta 10 % por servicios (Art. 156 L.I.S.R.) y Pago a cuenta 1.75 % (Art. 151 C.T.), con la partida generada automáticamente y un resumen de saldos por declarar. |
+| **Documentos** | Permite crear varios libros contables independientes (por ejemplo, uno por empresa o período) y cambiar entre ellos. Cada documento tiene su propio Plan de Cuentas, Libro Diario y Kardex. Al crear un documento nuevo se puede cargar un **catálogo de cuentas comunes** con un clic. |
 | **Reportes** | Balance de Comprobación, Estado de Resultados y Balance General, generados automáticamente según el código de cada cuenta. Cada reporte (o los tres juntos) se puede **exportar a PDF o Excel**. |
 
 ### Codificación del catálogo de cuentas
@@ -248,7 +249,7 @@ appContabilidad/
 └── public/                  # Frontend (lo sirve el mismo servidor)
     ├── index.html
     ├── css/styles.css
-    └── js/                  # Un archivo por módulo (diario.js, kardex.js, reportes.js, exportar.js, retenciones.js, ...)
+    └── js/                  # Un archivo por módulo (diario.js, cuentas.js, kardex.js, reportes.js, documentos.js, exportar.js, ...)
 ```
 
 ---
@@ -262,5 +263,6 @@ appContabilidad/
 | `partidas` | Encabezado de cada partida del Libro Diario: fecha, concepto, totales y estado (activa/anulada). |
 | `movimientos` | Cada línea (cuenta, Debe, Haber) de cada partida. Se usa para el Libro Mayor. |
 | `kardex` | Entradas y salidas de inventario con existencias, costo unitario y saldo. |
+| `documentos` | Libros contables independientes que agrupan cuentas, partidas y kardex (por ejemplo, uno por empresa o período). |
 
 El detalle completo de columnas y restricciones está en `schema.sql`.

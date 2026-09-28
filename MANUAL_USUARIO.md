@@ -13,7 +13,7 @@ Las capturas usan los datos de prueba de agosto 2026 que se cargan con
 3. [Libro Diario](#3-libro-diario)
 4. [Plan de Cuentas y Libro Mayor](#4-plan-de-cuentas-y-libro-mayor)
 5. [Kardex (inventario)](#5-kardex-inventario)
-6. [Cierre e Impuestos](#6-cierre-e-impuestos)
+6. [Documentos](#6-documentos)
 7. [Reportes Financieros](#7-reportes-financieros)
 8. [Flujo recomendado del ciclo contable](#8-flujo-recomendado-del-ciclo-contable)
 9. [Preguntas frecuentes](#9-preguntas-frecuentes)
@@ -39,7 +39,7 @@ Las capturas usan los datos de prueba de agosto 2026 que se cargan con
   de Roles en el README).
 
 El menú de la izquierda lleva a cada módulo: **Dashboard, Libro Diario, Plan de
-Cuentas / Mayor, Kardex, Cierre e Impuestos y Reportes**.
+Cuentas / Mayor, Kardex, Documentos y Reportes**.
 
 ---
 
@@ -169,61 +169,31 @@ Con el selector **Método de valuación** puedes ver el mismo inventario con:
 
 ---
 
-## 6. Cierre e Impuestos
+## 6. Documentos
 
-### 6.1 Liquidación de IVA
+![Documentos](docs/manual/09-documentos.png)
 
-![Liquidación de IVA](docs/manual/09-cierre-iva.png)
+Un **Documento** es un libro contable independiente: agrupa su propio Plan de
+Cuentas, Libro Diario y Kardex. Sirve para llevar la contabilidad de varias
+empresas o varios períodos por separado dentro de la misma cuenta de usuario.
 
-Compara el **Débito Fiscal** (IVA de ventas) con el **Crédito Fiscal** (IVA de
-compras) y genera la partida de liquidación.
+### 6.1 Crear y cambiar de documento
 
-1. Elige la **Fecha de cierre**.
-2. Selecciona las cuentas: **IVA Débito Fiscal** (2102), **IVA Crédito Fiscal**
-   (1104) y la **cuenta de liquidación** (2103 IVA por Pagar, o una cuenta de
-   remanente a favor).
-3. Da clic en **Calcular**. El sistema indica si hay **IVA por pagar**
-   (Débito > Crédito) o **remanente a favor** (Crédito > Débito).
-4. Da clic en **Generar partida de cierre**. La partida se registra sola en el
-   Libro Diario.
+1. En la barra superior de la barra lateral, da clic en el selector de
+   **Documento** para ver la lista de documentos existentes.
+2. Da clic en **+ Nuevo documento** y escribe un nombre (por ejemplo, el
+   nombre de la empresa o el período).
+3. Selecciona un documento de la lista para cambiarte a él; todo lo que veas
+   en Libro Diario, Plan de Cuentas y Kardex corresponde al documento activo.
 
-> En los datos de prueba el IVA de agosto ya está liquidado; por eso la captura
-> muestra ambos saldos en $0.00 y el botón desactivado.
+### 6.2 Catálogo de cuentas comunes
 
-### 6.2 Retenciones de impuestos (IVA y Renta)
-
-![Retenciones de impuestos](docs/manual/10-retenciones.png)
-
-Calcula retenciones según la normativa salvadoreña y genera la partida completa.
-
-| Tipo | Tasa | Base legal | Cuándo se usa |
-|---|---|---|---|
-| **Retención de IVA a proveedor** | 1 % | Art. 162 Código Tributario | Somos gran contribuyente y compramos a otro contribuyente por **$100 o más**. |
-| **IVA retenido por cliente** | 1 % | Art. 162 Código Tributario | Vendemos a un gran contribuyente por **$100 o más** y él nos retiene. |
-| **Retención de Renta por servicios** | 10 % | Art. 156 Ley de ISR | Pagamos servicios (honorarios, comisiones) a una persona natural. |
-| **Pago a cuenta** | 1.75 % | Art. 151 Código Tributario | Anticipo mensual del ISR sobre los ingresos brutos. |
-
-**Pasos:**
-
-1. Elige el **Tipo de retención**. Debajo aparece una explicación y la tasa.
-2. Escribe la **Fecha** y el **monto base** (sin IVA). En *Pago a cuenta* la base
-   se llena sola con el total de ingresos (código 5), pero puedes cambiarla.
-3. Revisa las cuentas sugeridas (por ejemplo, *Compras* y *Proveedores*) y
-   cámbialas si la operación usa otras.
-4. Da clic en **Calcular**. Se muestra el cálculo y la **partida completa** que
-   se registrará, con sus totales cuadrados.
-5. Da clic en **Registrar en Libro Diario**.
-
-Si una operación de IVA es menor de $100, el sistema avisa que **no aplica
-retención** según el Art. 162.
-
-**Resumen de retenciones:** muestra el saldo acumulado de cada cuenta de
-retención y en qué formulario se declara (**F-07** para IVA, **F-14** para
-retenciones de renta y pago a cuenta).
-
-> Si tu base de datos se creó antes de este módulo, aparecerá un aviso con el
-> botón **Crear cuentas de retención**, que agrega al catálogo las cuentas
-> 1106, 1107, 2104, 2105, 2106 y 4105.
+Al entrar por primera vez a un documento nuevo, el Plan de Cuentas aparece
+vacío. Da clic en **Cargar catálogo de cuentas comunes** para crear de una vez
+un catálogo típico de una empresa comercial salvadoreña (Caja, Bancos,
+Cuentas por Cobrar y por Pagar, IVA Crédito y Débito Fiscal, Inventario,
+Capital Social, Compras, Ventas, Gastos, etc.), listo para empezar a registrar
+partidas sin tener que crear cada cuenta a mano.
 
 ---
 
@@ -274,13 +244,14 @@ y la fecha, por ejemplo `Balance_General_2026-09-26.pdf`.
 
 ## 8. Flujo recomendado del ciclo contable
 
-1. **Plan de Cuentas:** revisa que existan las cuentas que vas a usar.
-2. **Libro Diario:** registra cada transacción del período como partida doble.
-3. **Kardex:** registra las entradas y salidas de mercadería.
-4. **Retenciones:** registra las compras, ventas o servicios con retención.
+1. **Documento:** crea o selecciona el documento (empresa/período) con el que
+   vas a trabajar.
+2. **Plan de Cuentas:** revisa que existan las cuentas que vas a usar, o carga
+   el catálogo de cuentas comunes si el documento es nuevo.
+3. **Libro Diario:** registra cada transacción del período como partida doble.
+4. **Kardex:** registra las entradas y salidas de mercadería.
 5. **Libro Mayor:** revisa los movimientos y saldos de las cuentas.
-6. **Cierre:** liquida el IVA del período.
-7. **Reportes:** verifica que el Balance de Comprobación y el Balance General
+6. **Reportes:** verifica que el Balance de Comprobación y el Balance General
    estén cuadrados y exporta los estados financieros a PDF o Excel.
 
 ---
