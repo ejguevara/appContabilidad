@@ -1,10 +1,10 @@
 // kardex.js
 // Modulo: Kardex de inventario. Se registra con Costo Promedio Ponderado y
-// se puede ver tambien con el metodo PEPS, mas el reporte de rotacion.
+// se puede ver tambien con el metodo PEPS.
 
 import { registrarKardex, escucharKardex } from './db.js';
 import { formatMoney, formatDate, hoyISO, toast } from './utils.js';
-import { calcularPEPS, calcularRotacion } from './inventario.js';
+import { calcularPEPS } from './inventario.js';
 
 const METODOS = {
   cpp: {
@@ -42,13 +42,11 @@ function metodoSeleccionado() {
 
 function renderKardex() {
   const metodo = metodoSeleccionado();
-  const registrosPEPS = calcularPEPS(registrosCPP);
 
   document.getElementById('kardex-metodo-titulo').textContent = METODOS[metodo].titulo;
   document.getElementById('kardex-metodo-nota').textContent = METODOS[metodo].nota;
 
-  renderTablaKardex(metodo === 'peps' ? registrosPEPS : registrosCPP);
-  renderRotacion(calcularRotacion(registrosCPP), calcularRotacion(registrosPEPS));
+  renderTablaKardex(metodo === 'peps' ? calcularPEPS(registrosCPP) : registrosCPP);
 }
 
 function tipoSeleccionado() {
@@ -127,35 +125,4 @@ function renderCapas(capas) {
     ? capas.map((c) => `${c.cantidad} u × ${formatMoney(c.costo)}`).join(' · ')
     : 'Sin existencias';
   return `<div class="text-xs text-slate-400">Lotes: ${texto}</div>`;
-}
-
-function renderRotacion(cpp, peps) {
-  const tbody = document.getElementById('cuerpo-rotacion-inventario');
-  if (!cpp || !peps) {
-    tbody.innerHTML = '<tr><td colspan="3" class="px-3 py-6 text-center text-sm text-slate-400">Aun no hay movimientos de kardex.</td></tr>';
-    return;
-  }
-
-  const veces = (n) => `${n.toFixed(2)} veces`;
-  const dias = (n) => `${n.toFixed(1)} días`;
-  const filas = [
-    ['Costo de ventas', formatMoney(cpp.costoVentas), formatMoney(peps.costoVentas)],
-    ['Inventario inicial', formatMoney(cpp.inventarioInicial), formatMoney(peps.inventarioInicial)],
-    ['Inventario final', formatMoney(cpp.inventarioFinal), formatMoney(peps.inventarioFinal)],
-    ['Inventario promedio', formatMoney(cpp.inventarioPromedio), formatMoney(peps.inventarioPromedio)],
-    ['Rotación de inventario', veces(cpp.rotacion), veces(peps.rotacion), true],
-    ['Días del período', `${cpp.diasPeriodo} días`, `${peps.diasPeriodo} días`],
-    ['Días de inventario', dias(cpp.diasInventario), dias(peps.diasInventario), true],
-  ];
-
-  tbody.innerHTML = filas
-    .map(
-      ([concepto, a, b, destacado]) => `
-      <tr class="border-b border-slate-100 ${destacado ? 'font-semibold text-slate-800' : ''}">
-        <td class="px-3 py-2 text-sm">${concepto}</td>
-        <td class="px-3 py-2 text-sm text-right font-mono">${a}</td>
-        <td class="px-3 py-2 text-sm text-right font-mono">${b}</td>
-      </tr>`
-    )
-    .join('');
 }

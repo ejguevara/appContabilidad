@@ -1,6 +1,6 @@
 // inventario.js
 // Calculos de inventario sin DOM: metodo PEPS (Primeras Entradas, Primeras
-// Salidas) y reporte de rotacion de inventario.
+// Salidas).
 //
 // El backend guarda el kardex con Costo Promedio Ponderado. PEPS se
 // recalcula aqui a partir de los mismos movimientos: de cada entrada se toma
@@ -58,40 +58,4 @@ export function calcularPEPS(registros) {
       capas: capas.map((c) => ({ ...c })),
     };
   });
-}
-
-/**
- * Reporte de rotacion de inventario para un kardex ya calculado.
- *   Costo de ventas      = suma de la columna Acreedor (salidas valuadas)
- *   Inventario inicial   = saldo del primer registro (inventario de apertura)
- *   Inventario final     = saldo del ultimo registro
- *   Inventario promedio  = (inicial + final) / 2
- *   Rotacion             = costo de ventas / inventario promedio  (veces)
- *   Dias de inventario   = dias del periodo / rotacion
- */
-export function calcularRotacion(registros) {
-  if (!registros.length) return null;
-
-  const primero = registros[0];
-  const ultimo = registros[registros.length - 1];
-
-  const costoVentas = round2(registros.reduce((s, r) => s + r.acreedor, 0));
-  const inventarioInicial = round2(primero.saldo);
-  const inventarioFinal = round2(ultimo.saldo);
-  const inventarioPromedio = round2((inventarioInicial + inventarioFinal) / 2);
-  const rotacion = inventarioPromedio > 0 ? costoVentas / inventarioPromedio : 0;
-
-  const msPorDia = 24 * 60 * 60 * 1000;
-  const diasPeriodo = Math.round((new Date(ultimo.fecha) - new Date(primero.fecha)) / msPorDia) + 1;
-  const diasInventario = rotacion > 0 ? diasPeriodo / rotacion : 0;
-
-  return {
-    costoVentas,
-    inventarioInicial,
-    inventarioFinal,
-    inventarioPromedio,
-    rotacion,
-    diasPeriodo,
-    diasInventario,
-  };
 }
