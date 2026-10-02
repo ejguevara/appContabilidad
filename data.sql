@@ -75,7 +75,7 @@ WITH p AS (
 )
 INSERT INTO movimientos (documento_id, partida_id, cuenta_id, fecha, concepto, debe, haber)
 SELECT p.documento_id, p.id, c.id, '2026-08-01', 'Aportacion de capital de los socios', v.debe, v.haber
-FROM p, (VALUES ('1102', 8000::numeric, 0::numeric), ('1105', 2000, 0), ('3101', 0, 10000)) AS v(codigo, debe, haber)
+FROM p CROSS JOIN (VALUES ('1102', 8000::numeric, 0::numeric), ('1105', 2000, 0), ('3101', 0, 10000)) AS v(codigo, debe, haber)
 JOIN cuentas c ON c.codigo = v.codigo AND c.documento_id = p.documento_id;
 
 WITH p AS (
@@ -85,7 +85,7 @@ WITH p AS (
 )
 INSERT INTO movimientos (documento_id, partida_id, cuenta_id, fecha, concepto, debe, haber)
 SELECT p.documento_id, p.id, c.id, '2026-08-03', 'Compra de mercaderia al credito', v.debe, v.haber
-FROM p, (VALUES ('4101', 5000::numeric, 0::numeric), ('1104', 650, 0), ('2101', 0, 5650)) AS v(codigo, debe, haber)
+FROM p CROSS JOIN (VALUES ('4101', 5000::numeric, 0::numeric), ('1104', 650, 0), ('2101', 0, 5650)) AS v(codigo, debe, haber)
 JOIN cuentas c ON c.codigo = v.codigo AND c.documento_id = p.documento_id;
 
 WITH p AS (
@@ -95,7 +95,7 @@ WITH p AS (
 )
 INSERT INTO movimientos (documento_id, partida_id, cuenta_id, fecha, concepto, debe, haber)
 SELECT p.documento_id, p.id, c.id, '2026-08-05', 'Venta de mercaderia al contado', v.debe, v.haber
-FROM p, (VALUES ('1101', 9040::numeric, 0::numeric), ('5101', 0, 8000), ('2102', 0, 1040)) AS v(codigo, debe, haber)
+FROM p CROSS JOIN (VALUES ('1101', 9040::numeric, 0::numeric), ('5101', 0, 8000), ('2102', 0, 1040)) AS v(codigo, debe, haber)
 JOIN cuentas c ON c.codigo = v.codigo AND c.documento_id = p.documento_id;
 
 WITH p AS (
@@ -105,7 +105,7 @@ WITH p AS (
 )
 INSERT INTO movimientos (documento_id, partida_id, cuenta_id, fecha, concepto, debe, haber)
 SELECT p.documento_id, p.id, c.id, '2026-08-08', 'Pago parcial a proveedores', v.debe, v.haber
-FROM p, (VALUES ('2101', 3000::numeric, 0::numeric), ('1102', 0, 3000)) AS v(codigo, debe, haber)
+FROM p CROSS JOIN (VALUES ('2101', 3000::numeric, 0::numeric), ('1102', 0, 3000)) AS v(codigo, debe, haber)
 JOIN cuentas c ON c.codigo = v.codigo AND c.documento_id = p.documento_id;
 
 WITH p AS (
@@ -115,7 +115,7 @@ WITH p AS (
 )
 INSERT INTO movimientos (documento_id, partida_id, cuenta_id, fecha, concepto, debe, haber)
 SELECT p.documento_id, p.id, c.id, '2026-08-10', 'Venta de mercaderia al credito', v.debe, v.haber
-FROM p, (VALUES ('1103', 4520::numeric, 0::numeric), ('5101', 0, 4000), ('2102', 0, 520)) AS v(codigo, debe, haber)
+FROM p CROSS JOIN (VALUES ('1103', 4520::numeric, 0::numeric), ('5101', 0, 4000), ('2102', 0, 520)) AS v(codigo, debe, haber)
 JOIN cuentas c ON c.codigo = v.codigo AND c.documento_id = p.documento_id;
 
 WITH p AS (
@@ -125,7 +125,7 @@ WITH p AS (
 )
 INSERT INTO movimientos (documento_id, partida_id, cuenta_id, fecha, concepto, debe, haber)
 SELECT p.documento_id, p.id, c.id, '2026-08-15', 'Cobro a clientes', v.debe, v.haber
-FROM p, (VALUES ('1101', 4520::numeric, 0::numeric), ('1103', 0, 4520)) AS v(codigo, debe, haber)
+FROM p CROSS JOIN (VALUES ('1101', 4520::numeric, 0::numeric), ('1103', 0, 4520)) AS v(codigo, debe, haber)
 JOIN cuentas c ON c.codigo = v.codigo AND c.documento_id = p.documento_id;
 
 WITH p AS (
@@ -135,7 +135,7 @@ WITH p AS (
 )
 INSERT INTO movimientos (documento_id, partida_id, cuenta_id, fecha, concepto, debe, haber)
 SELECT p.documento_id, p.id, c.id, '2026-08-18', 'Compra de mercaderia al contado', v.debe, v.haber
-FROM p, (VALUES ('4101', 2000::numeric, 0::numeric), ('1104', 260, 0), ('1102', 0, 2260)) AS v(codigo, debe, haber)
+FROM p CROSS JOIN (VALUES ('4101', 2000::numeric, 0::numeric), ('1104', 260, 0), ('1102', 0, 2260)) AS v(codigo, debe, haber)
 JOIN cuentas c ON c.codigo = v.codigo AND c.documento_id = p.documento_id;
 
 WITH p AS (
@@ -145,7 +145,7 @@ WITH p AS (
 )
 INSERT INTO movimientos (documento_id, partida_id, cuenta_id, fecha, concepto, debe, haber)
 SELECT p.documento_id, p.id, c.id, '2026-08-20', 'Pago de gastos de venta (publicidad)', v.debe, v.haber
-FROM p, (VALUES ('4103', 350::numeric, 0::numeric), ('1101', 0, 350)) AS v(codigo, debe, haber)
+FROM p CROSS JOIN (VALUES ('4103', 350::numeric, 0::numeric), ('1101', 0, 350)) AS v(codigo, debe, haber)
 JOIN cuentas c ON c.codigo = v.codigo AND c.documento_id = p.documento_id;
 
 WITH p AS (
@@ -155,7 +155,7 @@ WITH p AS (
 )
 INSERT INTO movimientos (documento_id, partida_id, cuenta_id, fecha, concepto, debe, haber)
 SELECT p.documento_id, p.id, c.id, '2026-08-22', 'Pago de gastos de administracion (planilla y alquiler)', v.debe, v.haber
-FROM p, (VALUES ('4104', 1200::numeric, 0::numeric), ('1101', 0, 1200)) AS v(codigo, debe, haber)
+FROM p CROSS JOIN (VALUES ('4104', 1200::numeric, 0::numeric), ('1101', 0, 1200)) AS v(codigo, debe, haber)
 JOIN cuentas c ON c.codigo = v.codigo AND c.documento_id = p.documento_id;
 
 WITH p AS (
@@ -165,7 +165,7 @@ WITH p AS (
 )
 INSERT INTO movimientos (documento_id, partida_id, cuenta_id, fecha, concepto, debe, haber)
 SELECT p.documento_id, p.id, c.id, '2026-08-25', 'Venta de mercaderia al contado', v.debe, v.haber
-FROM p, (VALUES ('1101', 7345::numeric, 0::numeric), ('5101', 0, 6500), ('2102', 0, 845)) AS v(codigo, debe, haber)
+FROM p CROSS JOIN (VALUES ('1101', 7345::numeric, 0::numeric), ('5101', 0, 6500), ('2102', 0, 845)) AS v(codigo, debe, haber)
 JOIN cuentas c ON c.codigo = v.codigo AND c.documento_id = p.documento_id;
 
 WITH p AS (
@@ -175,7 +175,7 @@ WITH p AS (
 )
 INSERT INTO movimientos (documento_id, partida_id, cuenta_id, fecha, concepto, debe, haber)
 SELECT p.documento_id, p.id, c.id, '2026-08-28', 'Venta de mercaderia al contado', v.debe, v.haber
-FROM p, (VALUES ('1101', 2034::numeric, 0::numeric), ('5101', 0, 1800), ('2102', 0, 234)) AS v(codigo, debe, haber)
+FROM p CROSS JOIN (VALUES ('1101', 2034::numeric, 0::numeric), ('5101', 0, 1800), ('2102', 0, 234)) AS v(codigo, debe, haber)
 JOIN cuentas c ON c.codigo = v.codigo AND c.documento_id = p.documento_id;
 
 WITH p AS (
@@ -185,7 +185,7 @@ WITH p AS (
 )
 INSERT INTO movimientos (documento_id, partida_id, cuenta_id, fecha, concepto, debe, haber)
 SELECT p.documento_id, p.id, c.id, '2026-08-30', 'Liquidacion de IVA del periodo - IVA por Pagar', v.debe, v.haber
-FROM p, (VALUES ('2102', 2639::numeric, 0::numeric), ('1104', 0, 910), ('2103', 0, 1729)) AS v(codigo, debe, haber)
+FROM p CROSS JOIN (VALUES ('2102', 2639::numeric, 0::numeric), ('1104', 0, 910), ('2103', 0, 1729)) AS v(codigo, debe, haber)
 JOIN cuentas c ON c.codigo = v.codigo AND c.documento_id = p.documento_id;
 
 -- -------------------------------------------------------------------------
